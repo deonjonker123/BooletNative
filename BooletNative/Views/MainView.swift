@@ -17,6 +17,7 @@ enum NavigationDestination: Hashable {
     case abandonedBooks
     case allBooks
     case completedBooks
+    case readingTracker
 }
 
 struct MainView: View {
@@ -154,6 +155,8 @@ struct MainView: View {
                         LibraryView(navigationPath: $navigationPath)
                     case .completedBooks:
                         CompletedBooksView(navigationPath: $navigationPath)
+                    case .readingTracker:
+                        ReadingTrackerView(navigationPath: $navigationPath)
                     }
                 }
             }

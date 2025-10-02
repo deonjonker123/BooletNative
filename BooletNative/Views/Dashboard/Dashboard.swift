@@ -109,9 +109,11 @@ struct DashboardView: View {
                                         ModernReadingCard(
                                             entry: entry,
                                             book: book,
-                                            navigationPath: $navigationPath,
                                             delay: Double(index) * 0.1
                                         )
+                                        .onTapGesture {
+                                            navigationPath.append(NavigationDestination.readingTracker)
+                                        }
                                     }
                                 }
                             }
@@ -281,35 +283,21 @@ struct ModernStatCard: View {
 struct ModernReadingCard: View {
     let entry: ReadingTrackerEntry
     let book: Book
-    @Binding var navigationPath: NavigationPath
     let delay: Double
     
     @State private var isVisible: Bool = false
     @State private var isHovered: Bool = false
     
     var body: some View {
-        Button(action: {
-            navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
-        }) {
-            HStack(spacing: 16) {
-                // Cover with shadow
-                Group {
-                    if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                        AsyncImage(url: url) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
-                            Rectangle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [Color(hex: "667eea").opacity(0.3), Color(hex: "764ba2").opacity(0.3)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                        }
-                    } else {
+        HStack(spacing: 16) {
+            // Cover with shadow
+            Group {
+                if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
                         Rectangle()
                             .fill(
                                 LinearGradient(
@@ -319,76 +307,84 @@ struct ModernReadingCard: View {
                                 )
                             )
                     }
+                } else {
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color(hex: "667eea").opacity(0.3), Color(hex: "764ba2").opacity(0.3)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
                 }
-                .frame(width: 70, height: 105)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
+            }
+            .frame(width: 70, height: 105)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text(book.title)
+                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .frame(maxWidth: 180, alignment: .leading)
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(book.title)
-                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                        .foregroundColor(.primary)
-                        .lineLimit(2)
-                        .frame(maxWidth: 180, alignment: .leading)
+                Text(book.author)
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                // Compact progress
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Text("\(Int(entry.progressPercentage))%")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                        
+                        Text("• \(entry.currentPage) / \(book.pageCount)")
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondary)
+                    }
                     
-                    Text(book.author)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    
-                    // Compact progress
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 6) {
-                            Text("\(Int(entry.progressPercentage))%")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
-                                .foregroundStyle(
+                    // Progress bar
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.secondary.opacity(0.15))
+                                .frame(height: 6)
+                            
+                            Capsule()
+                                .fill(
                                     LinearGradient(
                                         colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
                                         startPoint: .leading,
                                         endPoint: .trailing
                                     )
                                 )
-                            
-                            Text("• \(entry.currentPage) / \(book.pageCount)")
-                                .font(.system(size: 11, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondary)
+                                .frame(width: geometry.size.width * (entry.progressPercentage / 100.0), height: 6)
                         }
-                        
-                        // Progress bar
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(Color.secondary.opacity(0.15))
-                                    .frame(height: 6)
-                                
-                                Capsule()
-                                    .fill(
-                                        LinearGradient(
-                                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .frame(width: geometry.size.width * (entry.progressPercentage / 100.0), height: 6)
-                            }
-                        }
-                        .frame(height: 6)
                     }
+                    .frame(height: 6)
                 }
             }
-            .padding(16)
-            .frame(width: 300)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-                    .shadow(color: Color.black.opacity(isHovered ? 0.1 : 0.05), radius: isHovered ? 10 : 6, x: 0, y: isHovered ? 4 : 2)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(Color.secondary.opacity(isHovered ? 0.2 : 0.1), lineWidth: 1)
-            )
         }
-        .buttonStyle(.plain)
+        .padding(16)
+        .frame(width: 300)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(nsColor: .controlBackgroundColor))
+                .shadow(color: Color.black.opacity(isHovered ? 0.1 : 0.05), radius: isHovered ? 10 : 6, x: 0, y: isHovered ? 4 : 2)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.secondary.opacity(isHovered ? 0.2 : 0.1), lineWidth: 1)
+        )
         .scaleEffect(isVisible ? 1.0 : 0.9)
         .opacity(isVisible ? 1.0 : 0)
         .scaleEffect(isHovered ? 1.03 : 1.0)

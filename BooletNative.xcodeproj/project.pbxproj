@@ -9,7 +9,6 @@
 /* Begin PBXFileReference section */
 		842908922E8EB485005DFD9D /* BooletNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BooletNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		842908A32E8EB527005DFD9D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
-		842908A42E8EB52E005DFD9D /* booklet.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = booklet.db; sourceTree = "<group>"; };
 		842908A52E8EB5B2005DFD9D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -53,7 +52,6 @@
 		842908A22E8EB527005DFD9D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				842908A42E8EB52E005DFD9D /* booklet.db */,
 				842908A32E8EB527005DFD9D /* libsqlite3.tbd */,
 			);
 			name = Frameworks;

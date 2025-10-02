@@ -90,6 +90,7 @@ struct ReadingTrackerView: View {
                         showCompleteModal = false
                     }
                 )
+                .environmentObject(dbManager)
             }
         }
         .sheet(isPresented: $showAbandonModal) {

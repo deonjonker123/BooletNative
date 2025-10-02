@@ -1,10 +1,3 @@
-//
-//  EditBookModal.swift
-//  Booklet
-//
-//  Modern edit modal with cover preview
-//
-
 import SwiftUI
 
 struct EditBookModal: View {
@@ -37,13 +30,13 @@ struct EditBookModal: View {
     }
     
     var body: some View {
-        HStack(spacing: 0) {
-            // Left side - Cover Preview
-            VStack {
+        VStack(spacing: 0) {
+            
+            // Cover Preview
+            VStack(spacing: 12) {
                 Text("Cover Preview")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.secondary)
-                    .padding(.bottom, 12)
                 
                 Group {
                     if !coverUrl.isEmpty, let url = URL(string: coverUrl) {
@@ -69,155 +62,94 @@ struct EditBookModal: View {
                     }
                 }
                 .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
-                
-                Spacer()
             }
-            .frame(width: 220)
-            .padding(24)
-            .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+            .padding(.top, 24)
             
-            // Right side - Form
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    Text("Edit Book")
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundStyle(
+            Divider()
+                .padding(.vertical, 16)
+            
+            // Form
+            ScrollView {
+                VStack(spacing: 18) {
+                    ModernTextField(placeholder: "https://...", text: $coverUrl)
+                    
+                    ModernTextField(placeholder: "Book title", text: $title)
+                    
+                    HStack(spacing: 14) {
+                        ModernTextField(placeholder: "Series name", text: $series)
+                        ModernTextField(placeholder: "1 or 1.5", text: $seriesNumber)
+                            .frame(width: 120)
+                    }
+                    
+                    ModernTextField(placeholder: "Author name", text: $author)
+                    
+                    HStack(spacing: 14) {
+                        ModernTextField(placeholder: "350", text: $pageCount)
+                        ModernTextField(placeholder: "Fantasy", text: $genre)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Synopsis", systemImage: "text.alignleft")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                        
+                        TextEditor(text: $synopsis)
+                            .font(.system(size: 13, design: .rounded))
+                            .frame(height: 100)
+                            .padding(8)
+                            .background(Color(nsColor: .textBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                            )
+                    }
+                }
+                .padding(.horizontal, 28)
+                .padding(.bottom, 24)
+            }
+            
+            // Divider + Action Buttons
+            Divider()
+            
+            HStack(spacing: 12) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(nsColor: .controlBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+                
+                Button(action: saveBook) {
+                    Text("Save Changes")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
                             LinearGradient(
-                                colors: [.orange, .pink],
+                                colors: isFormValid ? [Color(hex: "f093fb"), Color(hex: "f5576c")] : [Color.secondary, Color.secondary],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
                         )
-                    
-                    Spacer()
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(color: isFormValid ? Color(hex: "f5576c").opacity(0.4) : Color.clear, radius: 8, x: 0, y: 4)
                 }
-                .padding(.horizontal, 28)
-                .padding(.top, 24)
-                .padding(.bottom, 20)
-                
-                Divider()
-                
-                // Form Fields
-                ScrollView {
-                    VStack(spacing: 18) {
-                        ModernTextField(
-                            label: "Cover URL",
-                            placeholder: "https://...",
-                            text: $coverUrl,
-                            icon: "photo"
-                        )
-                        
-                        ModernTextField(
-                            label: "Title *",
-                            placeholder: "Book title",
-                            text: $title,
-                            icon: "book.closed"
-                        )
-                        
-                        HStack(spacing: 14) {
-                            ModernTextField(
-                                label: "Series",
-                                placeholder: "Series name",
-                                text: $series,
-                                icon: "books.vertical"
-                            )
-                            
-                            ModernTextField(
-                                label: "Number",
-                                placeholder: "1 or 1.5",
-                                text: $seriesNumber,
-                                icon: "number"
-                            )
-                            .frame(width: 120)
-                        }
-                        
-                        ModernTextField(
-                            label: "Author *",
-                            placeholder: "Author name",
-                            text: $author,
-                            icon: "person"
-                        )
-                        
-                        HStack(spacing: 14) {
-                            ModernTextField(
-                                label: "Page Count *",
-                                placeholder: "350",
-                                text: $pageCount,
-                                icon: "doc.text"
-                            )
-                            
-                            ModernTextField(
-                                label: "Genre",
-                                placeholder: "Fantasy",
-                                text: $genre,
-                                icon: "tag"
-                            )
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Label("Synopsis", systemImage: "text.alignleft")
-                                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                                .foregroundColor(.secondary)
-                            
-                            TextEditor(text: $synopsis)
-                                .font(.system(size: 13, design: .rounded))
-                                .frame(height: 100)
-                                .padding(8)
-                                .background(Color(nsColor: .textBackgroundColor))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                                )
-                        }
-                    }
-                    .padding(.horizontal, 28)
-                    .padding(.vertical, 24)
-                }
-                
-                Divider()
-                
-                // Action Buttons
-                HStack(spacing: 12) {
-                    Button(action: onCancel) {
-                        Text("Cancel")
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Color(nsColor: .controlBackgroundColor))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                    }
-                    .buttonStyle(.plain)
-                    .keyboardShortcut(.cancelAction)
-                    
-                    Button(action: saveBook) {
-                        Text("Save Changes")
-                            .font(.system(size: 14, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                LinearGradient(
-                                    colors: isFormValid ? [Color(hex: "f093fb"), Color(hex: "f5576c")] : [Color.secondary, Color.secondary],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .shadow(color: isFormValid ? Color(hex: "f5576c").opacity(0.4) : Color.clear, radius: 8, x: 0, y: 4)
-                    }
-                    .buttonStyle(.plain)
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!isFormValid)
-                }
-                .padding(.horizontal, 28)
-                .padding(.vertical, 20)
+                .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
+                .disabled(!isFormValid)
             }
-            .frame(width: 480)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 20)
+            
         }
-        .frame(width: 700, height: 600)
+        .frame(width: 500, height: 700)
         .background(Color(nsColor: .textBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
@@ -268,13 +200,4 @@ struct EditBookModal: View {
         
         onSave()
     }
-}
-
-#Preview {
-    EditBookModal(
-        book: Book(id: 1, title: "Test Book", author: "Test Author", pageCount: 300, dateAdded: Date()),
-        onSave: {},
-        onCancel: {}
-    )
-    .environmentObject(DatabaseManager.shared)
 }

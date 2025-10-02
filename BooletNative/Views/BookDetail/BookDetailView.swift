@@ -2,7 +2,7 @@
 //  BookDetailView.swift
 //  Booklet
 //
-//  Individual book detail page
+//  Individual book detail page with modern design
 //
 
 import SwiftUI
@@ -41,293 +41,238 @@ struct BookDetailView: View {
     var body: some View {
         ScrollView {
             if let book = book {
-                VStack(alignment: .leading, spacing: 30) {
-                    // Header with Back Button
+                VStack(alignment: .leading, spacing: 0) {
+                    // Header with Back Button and Actions
                     HStack {
                         Button(action: { dismiss() }) {
-                            HStack(spacing: 5) {
+                            HStack(spacing: 6) {
                                 Image(systemName: "chevron.left")
+                                    .font(.system(size: 14, weight: .semibold))
                                 Text("Back")
+                                    .font(.system(size: 14, weight: .medium, design: .rounded))
                             }
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Capsule())
                         }
-                        .buttonStyle(.borderless)
+                        .buttonStyle(.plain)
                         
                         Spacer()
                         
                         // Action Buttons
                         HStack(spacing: 10) {
-                            Button("Edit") {
-                                showEditModal = true
-                            }
-                            .buttonStyle(.bordered)
+                            ModernActionButton(
+                                title: "Edit",
+                                icon: "pencil.circle.fill",
+                                color: .orange,
+                                action: { showEditModal = true }
+                            )
                             
                             if bookLocation == .library {
-                                Button("Read") {
-                                    showReadConfirm = true
-                                }
-                                .buttonStyle(.borderedProminent)
+                                ModernActionButton(
+                                    title: "Read",
+                                    icon: "book.circle.fill",
+                                    color: .green,
+                                    action: { showReadConfirm = true }
+                                )
                             }
                             
-                            Button("Delete") {
-                                showDeleteConfirm = true
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.red)
+                            ModernActionButton(
+                                title: "Delete",
+                                icon: "trash.circle.fill",
+                                color: .red,
+                                action: { showDeleteConfirm = true }
+                            )
                         }
                     }
-                    
-                    // Book Details
-                    HStack(alignment: .top, spacing: 30) {
-                        // Cover
-                        if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                            AsyncImage(url: url) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                            }
-                            .frame(width: 200, height: 300)
-                            .cornerRadius(12)
-                        } else {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 200, height: 300)
-                                .cornerRadius(12)
-                        }
-                        
-                        // Info
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text(book.title)
-                                .font(.system(size: 32, weight: .bold))
-                            
-                            if let seriesDisplay = book.seriesDisplay, let series = book.series {
-                                Button(action: {
-                                    navigationPath.append(NavigationDestination.series(name: series))
-                                }) {
-                                    HStack {
-                                        Image(systemName: "books.vertical")
-                                        Text(seriesDisplay)
-                                            .font(.system(size: 18))
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundColor(.blue)
-                            }
-                            
-                            Button(action: {
-                                navigationPath.append(NavigationDestination.author(name: book.author))
-                            }) {
-                                HStack {
-                                    Image(systemName: "person")
-                                    Text(book.author)
-                                        .font(.system(size: 18))
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .foregroundColor(.blue)
-                            
-                            if let genre = book.genre {
-                                Button(action: {
-                                    navigationPath.append(NavigationDestination.genre(name: genre))
-                                }) {
-                                    HStack {
-                                        Image(systemName: "tag")
-                                        Text(genre)
-                                            .font(.system(size: 16))
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundColor(.blue)
-                            }
-                            
-                            HStack {
-                                Image(systemName: "doc.text")
-                                Text("\(book.pageCount) pages")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            HStack {
-                                Image(systemName: "calendar")
-                                Text("Added \(dateFormatter.string(from: book.dateAdded))")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            // Location Badge
-                            HStack {
-                                Image(systemName: "mappin.circle.fill")
-                                Text(locationText)
-                                    .font(.system(size: 14, weight: .medium))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(locationColor.opacity(0.2))
-                                    .foregroundColor(locationColor)
-                                    .cornerRadius(8)
-                            }
-                        }
-                    }
+                    .padding(24)
+                    .padding(.bottom, 8)
                     
                     Divider()
                     
-                    // Synopsis
-                    if let synopsis = book.synopsis {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Synopsis")
-                                .font(.system(size: 20, weight: .semibold))
+                    // Book Details Section
+                    HStack(alignment: .top, spacing: 40) {
+                        // Cover
+                        VStack {
+                            Group {
+                                if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
+                                    AsyncImage(url: url) { image in
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                    } placeholder: {
+                                        Rectangle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [Color.secondary.opacity(0.2), Color.secondary.opacity(0.1)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                    }
+                                } else {
+                                    Rectangle()
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Color.secondary.opacity(0.2), Color.secondary.opacity(0.1)],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                }
+                            }
+                            .frame(width: 240, height: 360)
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                        }
+                        
+                        // Info
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Title
+                            Text(book.title)
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.blue, .purple],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
                             
-                            Text(synopsis)
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 12) {
+                                // Series
+                                if let seriesDisplay = book.seriesDisplay, let series = book.series {
+                                    Button(action: {
+                                        navigationPath.append(NavigationDestination.series(name: series))
+                                    }) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "books.vertical.fill")
+                                                .font(.system(size: 16))
+                                            Text(seriesDisplay)
+                                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        }
+                                        .foregroundColor(.blue)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(Color.blue.opacity(0.1))
+                                        .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                                
+                                // Author
+                                Button(action: {
+                                    navigationPath.append(NavigationDestination.author(name: book.author))
+                                }) {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "person.fill")
+                                            .font(.system(size: 16))
+                                        Text(book.author)
+                                            .font(.system(size: 16, weight: .medium, design: .rounded))
+                                    }
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.1))
+                                    .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                                
+                                // Genre
+                                if let genre = book.genre {
+                                    Button(action: {
+                                        navigationPath.append(NavigationDestination.genre(name: genre))
+                                    }) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "tag.fill")
+                                                .font(.system(size: 16))
+                                            Text(genre)
+                                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                        }
+                                        .foregroundColor(.blue)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 8)
+                                        .background(Color.blue.opacity(0.1))
+                                        .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            
+                            // Metadata
+                            VStack(alignment: .leading, spacing: 10) {
+                                MetadataRow(icon: "doc.text.fill", text: "\(book.pageCount) pages")
+                                MetadataRow(icon: "calendar.circle.fill", text: "Added \(dateFormatter.string(from: book.dateAdded))")
+                            }
+                            
+                            // Location Badge
+                            HStack(spacing: 10) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .font(.system(size: 16))
+                                Text(locationText)
+                                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                            }
+                            .foregroundColor(locationColor)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
+                            .background(locationColor.opacity(0.15))
+                            .clipShape(Capsule())
                         }
                     }
+                    .padding(30)
                     
-                    // Status-specific information
-                    if let completed = completedEntry {
-                        Divider()
-                        
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text("Completion Details")
-                                .font(.system(size: 20, weight: .semibold))
+                    Divider()
+                    
+                    // Synopsis Section
+                    if let synopsis = book.synopsis {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Label("Synopsis", systemImage: "text.alignleft")
+                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primary)
                             
-                            if let rating = completed.rating {
-                                HStack(spacing: 3) {
-                                    Text("Rating:")
-                                        .font(.system(size: 15, weight: .medium))
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .foregroundColor(star <= rating ? .yellow : .gray)
-                                    }
-                                }
-                            }
-                            
-                            if let startDate = completed.startDate {
-                                Text("Started: \(dateFormatter.string(from: startDate))")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Text("Completed: \(dateFormatter.string(from: completed.completionDate))")
-                                .font(.system(size: 15))
+                            Text(synopsis)
+                                .font(.system(size: 15, design: .rounded))
                                 .foregroundColor(.secondary)
-                            
-                            if let days = completed.daysToComplete {
-                                Text("Time to complete: \(days) days")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            if let review = completed.review, !review.isEmpty {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Review")
-                                        .font(.system(size: 16, weight: .semibold))
-                                    
-                                    Text(review)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.secondary)
-                                        .padding(12)
-                                        .background(Color(nsColor: .controlBackgroundColor))
-                                        .cornerRadius(8)
-                                }
-                            }
+                                .lineSpacing(4)
                         }
+                        .padding(30)
+                        
+                        Divider()
+                    }
+                    
+                    // Status-specific Information
+                    if let completed = completedEntry {
+                        CompletedDetailsSection(completed: completed, dateFormatter: dateFormatter)
+                            .padding(30)
+                        Divider()
                     }
                     
                     if let abandoned = abandonedEntry {
+                        AbandonedDetailsSection(abandoned: abandoned, book: book, dateFormatter: dateFormatter)
+                            .padding(30)
                         Divider()
-                        
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text("Abandonment Details")
-                                .font(.system(size: 20, weight: .semibold))
-                            
-                            if let page = abandoned.pageAtAbandonment {
-                                Text("Stopped at page: \(page) / \(book.pageCount)")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
-                                
-                                if let progress = abandoned.progressPercentage {
-                                    Text("Progress: \(Int(progress))%")
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            
-                            if let startDate = abandoned.startDate {
-                                Text("Started: \(dateFormatter.string(from: startDate))")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Text("Abandoned: \(dateFormatter.string(from: abandoned.abandonmentDate))")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
-                            
-                            if let reason = abandoned.reason, !reason.isEmpty {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Reason")
-                                        .font(.system(size: 16, weight: .semibold))
-                                    
-                                    Text(reason)
-                                        .font(.system(size: 14))
-                                        .foregroundColor(.secondary)
-                                        .padding(12)
-                                        .background(Color(nsColor: .controlBackgroundColor))
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
                     }
                     
                     if let tracker = trackerEntry {
+                        TrackingDetailsSection(tracker: tracker, book: book, dateFormatter: dateFormatter)
+                            .padding(30)
                         Divider()
-                        
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text("Reading Progress")
-                                .font(.system(size: 20, weight: .semibold))
-                            
-                            Text("Current page: \(tracker.currentPage) / \(book.pageCount)")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
-                            
-                            Text("Progress: \(Int(tracker.progressPercentage))%")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
-                            
-                            Text("Started: \(dateFormatter.string(from: tracker.startDate))")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
-                            
-                            // Progress Bar
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    Rectangle()
-                                        .fill(Color.gray.opacity(0.2))
-                                        .frame(height: 12)
-                                        .cornerRadius(6)
-                                    
-                                    Rectangle()
-                                        .fill(Color.blue)
-                                        .frame(width: geometry.size.width * (tracker.progressPercentage / 100.0), height: 12)
-                                        .cornerRadius(6)
-                                }
-                            }
-                            .frame(height: 12)
-                            .frame(maxWidth: 400)
-                        }
                     }
                 }
-                .padding(30)
             } else {
-                VStack(spacing: 15) {
+                VStack(spacing: 20) {
                     ProgressView()
                     Text("Loading book...")
+                        .font(.system(size: 16, design: .rounded))
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.top, 100)
             }
         }
+        .background(Color(nsColor: .textBackgroundColor))
         .sheet(isPresented: $showEditModal) {
             if let book = book {
                 EditBookModal(book: book, onSave: {
@@ -406,6 +351,213 @@ struct BookDetailView: View {
             abandonedEntry = entry
         } else {
             bookLocation = .library
+        }
+    }
+}
+
+// MARK: - Metadata Row
+
+struct MetadataRow: View {
+    let icon: String
+    let text: String
+    
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(.secondary)
+                .frame(width: 20)
+            Text(text)
+                .font(.system(size: 15, design: .rounded))
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+// MARK: - Modern Action Button
+
+struct ModernActionButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    @State private var isHovered: Bool = false
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+            }
+            .foregroundColor(isHovered ? .white : color)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isHovered ? color : color.opacity(0.12))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(color.opacity(isHovered ? 0 : 0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
+    }
+}
+
+// MARK: - Completed Details Section
+
+struct CompletedDetailsSection: View {
+    let completed: CompletedBook
+    let dateFormatter: DateFormatter
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Completion Details", systemImage: "checkmark.seal.fill")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.green)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                if let rating = completed.rating {
+                    HStack(spacing: 6) {
+                        Text("Rating:")
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundColor(.secondary)
+                        ForEach(1...5, id: \.self) { star in
+                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                .font(.system(size: 16))
+                                .foregroundColor(star <= rating ? .yellow : .secondary.opacity(0.3))
+                        }
+                    }
+                }
+                
+                if let startDate = completed.startDate {
+                    MetadataRow(icon: "play.circle.fill", text: "Started: \(dateFormatter.string(from: startDate))")
+                }
+                
+                MetadataRow(icon: "checkmark.circle.fill", text: "Completed: \(dateFormatter.string(from: completed.completionDate))")
+                
+                if let days = completed.daysToComplete {
+                    MetadataRow(icon: "clock.fill", text: "Time to complete: \(days) days")
+                }
+                
+                if let review = completed.review, !review.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Review")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primary)
+                        
+                        Text(review)
+                            .font(.system(size: 14, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Abandoned Details Section
+
+struct AbandonedDetailsSection: View {
+    let abandoned: AbandonedBook
+    let book: Book
+    let dateFormatter: DateFormatter
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Abandonment Details", systemImage: "xmark.circle.fill")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.red)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                if let page = abandoned.pageAtAbandonment {
+                    MetadataRow(icon: "book.pages.fill", text: "Stopped at page: \(page) / \(book.pageCount)")
+                    
+                    if let progress = abandoned.progressPercentage {
+                        MetadataRow(icon: "chart.pie.fill", text: "Progress: \(Int(progress))%")
+                    }
+                }
+                
+                if let startDate = abandoned.startDate {
+                    MetadataRow(icon: "play.circle.fill", text: "Started: \(dateFormatter.string(from: startDate))")
+                }
+                
+                MetadataRow(icon: "xmark.circle.fill", text: "Abandoned: \(dateFormatter.string(from: abandoned.abandonmentDate))")
+                
+                if let reason = abandoned.reason, !reason.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Reason")
+                            .font(.system(size: 16, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primary)
+                        
+                        Text(reason)
+                            .font(.system(size: 14, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .padding(16)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Tracking Details Section
+
+struct TrackingDetailsSection: View {
+    let tracker: ReadingTrackerEntry
+    let book: Book
+    let dateFormatter: DateFormatter
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Reading Progress", systemImage: "book.fill")
+                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .foregroundColor(.orange)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                MetadataRow(icon: "book.pages.fill", text: "Current page: \(tracker.currentPage) / \(book.pageCount)")
+                MetadataRow(icon: "chart.pie.fill", text: "Progress: \(Int(tracker.progressPercentage))%")
+                MetadataRow(icon: "play.circle.fill", text: "Started: \(dateFormatter.string(from: tracker.startDate))")
+                
+                // Progress Bar
+                VStack(alignment: .leading, spacing: 8) {
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.secondary.opacity(0.2))
+                                .frame(height: 12)
+                            
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [Color(hex: "f093fb"), Color(hex: "f5576c")],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .frame(width: geometry.size.width * (tracker.progressPercentage / 100.0), height: 12)
+                        }
+                    }
+                    .frame(height: 12)
+                    .frame(maxWidth: 500)
+                }
+            }
         }
     }
 }

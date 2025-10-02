@@ -2,7 +2,7 @@
 //  StatisticsView.swift
 //  Booklet
 //
-//  Statistics page with charts and reading metrics
+//  Statistics page with modern charts and reading metrics
 //
 
 import SwiftUI
@@ -48,169 +48,257 @@ struct StatisticsView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .leading, spacing: 32) {
                 // Header with Year Filter
                 HStack {
                     Text("Statistics")
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.blue, .purple],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                     
                     Spacer()
                     
-                    Picker("", selection: $selectedYear) {
-                        ForEach(availableYears, id: \.self) { year in
-                            Text(year).tag(year)
+                    HStack(spacing: 8) {
+                        Image(systemName: "calendar.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundColor(.secondary)
+                        
+                        Picker("", selection: $selectedYear) {
+                            ForEach(availableYears, id: \.self) { year in
+                                Text(year).tag(year)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .font(.system(size: 14, design: .rounded))
+                        .frame(width: 140)
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 150)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                    )
                     .onChange(of: selectedYear) { _, _ in
                         filterBooks()
                     }
                 }
+                .padding(.horizontal, 32)
+                .padding(.top, 24)
+                
+                Divider()
+                    .padding(.horizontal, 32)
                 
                 // Reading Streak
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Reading Streak")
-                        .font(.system(size: 20, weight: .semibold))
-                    
-                    HStack {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 40))
-                            .foregroundColor(.orange)
+                HStack {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.orange, .red],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                            
+                            Text("Reading Streak")
+                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .foregroundColor(.primary)
+                        }
                         
-                        Text("\(readingStreak)")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.orange)
-                        
-                        Text("consecutive days")
-                            .font(.system(size: 18))
-                            .foregroundColor(.secondary)
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("\(readingStreak)")
+                                .font(.system(size: 56, weight: .bold, design: .rounded))
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [.orange, .red],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                            
+                            Text("consecutive days")
+                                .font(.system(size: 16, weight: .medium, design: .rounded))
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    .padding(20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .cornerRadius(12)
+                    
+                    Spacer()
                 }
+                .padding(28)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(nsColor: .controlBackgroundColor))
+                        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+                )
+                .padding(.horizontal, 32)
                 
-                // Raw Numbers Grid
-                HStack(spacing: 20) {
-                    StatCard(
-                        title: "Completed Books",
+                // Stats Grid
+                LazyVGrid(columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible())
+                ], spacing: 16) {
+                    StatsStatCard(
+                        title: "Completed",
                         value: "\(totalCompleted)",
-                        color: .green
+                        icon: "checkmark.seal.fill",
+                        gradient: [Color(hex: "11998e"), Color(hex: "38ef7d")]
                     )
                     
-                    StatCard(
+                    StatsStatCard(
                         title: "Pages Read",
                         value: "\(totalPagesRead)",
-                        color: .blue
+                        icon: "book.pages.fill",
+                        gradient: [Color(hex: "667eea"), Color(hex: "764ba2")]
                     )
                     
-                    StatCard(
-                        title: "Abandoned Books",
+                    StatsStatCard(
+                        title: "Abandoned",
                         value: "\(totalAbandoned)",
-                        color: .red
+                        icon: "xmark.circle.fill",
+                        gradient: [Color(hex: "eb3349"), Color(hex: "f45c43")]
                     )
                     
                     if let avgDays = averageTimeToFinish {
-                        StatCard(
-                            title: "Avg. Time to Finish",
-                            value: String(format: "%.1f days", avgDays),
-                            color: .purple
+                        StatsStatCard(
+                            title: "Avg. Days",
+                            value: String(format: "%.0f", avgDays),
+                            icon: "clock.fill",
+                            gradient: [Color(hex: "f093fb"), Color(hex: "f5576c")]
+                        )
+                    } else {
+                        StatsStatCard(
+                            title: "Avg. Days",
+                            value: "—",
+                            icon: "clock.fill",
+                            gradient: [Color(hex: "f093fb"), Color(hex: "f5576c")]
                         )
                     }
                 }
+                .padding(.horizontal, 32)
                 
-                // Pages/Books Read Over Time
-                if !filteredBooks.isEmpty {
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("Reading Activity Over Time")
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Chart {
-                            ForEach(monthlyStats, id: \.month) { stat in
-                                BarMark(
-                                    x: .value("Month", stat.monthName),
-                                    y: .value("Books", stat.booksCount)
-                                )
-                                .foregroundStyle(.blue)
+                // Charts Section
+                VStack(spacing: 24) {
+                    // Reading Activity Over Time
+                    if !filteredBooks.isEmpty {
+                        ChartCard(title: "Reading Activity", icon: "chart.bar.fill") {
+                            Chart {
+                                ForEach(monthlyStats, id: \.month) { stat in
+                                    BarMark(
+                                        x: .value("Month", stat.monthName),
+                                        y: .value("Books", stat.booksCount)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                            startPoint: .bottom,
+                                            endPoint: .top
+                                        )
+                                    )
+                                    .cornerRadius(6)
+                                }
+                            }
+                            .frame(height: 250)
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
                             }
                         }
-                        .frame(height: 250)
-                        .padding(15)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .cornerRadius(12)
                     }
-                }
-                
-                // Top 10 Authors
-                if !topAuthors.isEmpty {
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("Top 10 Most Read Authors")
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Chart {
-                            ForEach(topAuthors, id: \.author) { item in
-                                BarMark(
-                                    x: .value("Count", item.count),
-                                    y: .value("Author", item.author)
-                                )
-                                .foregroundStyle(.green)
+                    
+                    // Top Authors
+                    if !topAuthors.isEmpty {
+                        ChartCard(title: "Top 10 Authors", icon: "person.3.fill") {
+                            Chart {
+                                ForEach(topAuthors, id: \.author) { item in
+                                    BarMark(
+                                        x: .value("Count", item.count),
+                                        y: .value("Author", item.author)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [Color(hex: "11998e"), Color(hex: "38ef7d")],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .cornerRadius(6)
+                                }
+                            }
+                            .frame(height: 400)
+                            .chartXAxis {
+                                AxisMarks(position: .bottom)
                             }
                         }
-                        .frame(height: 350)
-                        .padding(15)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .cornerRadius(12)
                     }
-                }
-                
-                // Top 10 Genres
-                if !topGenres.isEmpty {
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("Top 10 Most Read Genres")
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Chart {
-                            ForEach(topGenres, id: \.genre) { item in
-                                BarMark(
-                                    x: .value("Count", item.count),
-                                    y: .value("Genre", item.genre)
-                                )
-                                .foregroundStyle(.orange)
+                    
+                    // Top Genres
+                    if !topGenres.isEmpty {
+                        ChartCard(title: "Top 10 Genres", icon: "tag.fill") {
+                            Chart {
+                                ForEach(topGenres, id: \.genre) { item in
+                                    BarMark(
+                                        x: .value("Count", item.count),
+                                        y: .value("Genre", item.genre)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [Color(hex: "f093fb"), Color(hex: "f5576c")],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .cornerRadius(6)
+                                }
+                            }
+                            .frame(height: 400)
+                            .chartXAxis {
+                                AxisMarks(position: .bottom)
                             }
                         }
-                        .frame(height: 350)
-                        .padding(15)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .cornerRadius(12)
                     }
-                }
-                
-                // Rating Split
-                if !ratingSplit.isEmpty {
-                    VStack(alignment: .leading, spacing: 15) {
-                        Text("Rating Distribution")
-                            .font(.system(size: 20, weight: .semibold))
-                        
-                        Chart {
-                            ForEach(ratingSplit, id: \.rating) { item in
-                                BarMark(
-                                    x: .value("Rating", "\(item.rating) ⭐"),
-                                    y: .value("Count", item.count)
-                                )
-                                .foregroundStyle(.yellow)
+                    
+                    // Rating Distribution
+                    if !ratingSplit.isEmpty {
+                        ChartCard(title: "Rating Distribution", icon: "star.fill") {
+                            Chart {
+                                ForEach(ratingSplit, id: \.rating) { item in
+                                    BarMark(
+                                        x: .value("Rating", "\(item.rating) ⭐"),
+                                        y: .value("Count", item.count)
+                                    )
+                                    .foregroundStyle(
+                                        LinearGradient(
+                                            colors: [Color.yellow.opacity(0.8), Color.orange],
+                                            startPoint: .bottom,
+                                            endPoint: .top
+                                        )
+                                    )
+                                    .cornerRadius(6)
+                                }
+                            }
+                            .frame(height: 250)
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
                             }
                         }
-                        .frame(height: 250)
-                        .padding(15)
-                        .background(Color(nsColor: .controlBackgroundColor))
-                        .cornerRadius(12)
                     }
                 }
+                .padding(.horizontal, 32)
+                
+                Spacer(minLength: 32)
             }
-            .padding(30)
         }
+        .background(Color(nsColor: .textBackgroundColor))
         .onAppear {
             loadData()
         }
@@ -235,7 +323,6 @@ struct StatisticsView: View {
     }
     
     private func calculateReadingStreak() {
-        // Get all completion dates sorted descending
         let dates = completedBooks.map { $0.completionDate }.sorted(by: >)
         guard !dates.isEmpty else {
             readingStreak = 0
@@ -337,6 +424,105 @@ struct StatisticsView: View {
         return (1...5).map { rating in
             RatingStats(rating: rating, count: ratingCounts[rating] ?? 0)
         }
+    }
+}
+
+// MARK: - Stats Stat Card
+
+struct StatsStatCard: View {
+    let title: String
+    let value: String
+    let icon: String
+    let gradient: [Color]
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: gradient,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 48, height: 48)
+                .background(
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: gradient.map { $0.opacity(0.15) },
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                )
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(value)
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: gradient,
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(nsColor: .controlBackgroundColor))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.secondary.opacity(0.1), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - Chart Card
+
+struct ChartCard<Content: View>: View {
+    let title: String
+    let icon: String
+    let content: Content
+    
+    init(title: String, icon: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.icon = icon
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.blue)
+                
+                Text(title)
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundColor(.primary)
+            }
+            
+            content
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(nsColor: .controlBackgroundColor))
+                .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
     }
 }
 

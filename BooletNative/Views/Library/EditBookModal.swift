@@ -1,25 +1,40 @@
 //
-//  AddBookModal.swift
+//  EditBookModal.swift
 //  Booklet
 //
-//  Modern modal with cover preview
+//  Modern edit modal with cover preview
 //
 
 import SwiftUI
 
-struct AddBookModal: View {
-    @Binding var isPresented: Bool
+struct EditBookModal: View {
+    let book: Book
     let onSave: () -> Void
+    let onCancel: () -> Void
     
     @EnvironmentObject var dbManager: DatabaseManager
-    @State private var coverUrl: String = ""
-    @State private var title: String = ""
-    @State private var series: String = ""
-    @State private var seriesNumber: String = ""
-    @State private var author: String = ""
-    @State private var pageCount: String = ""
-    @State private var synopsis: String = ""
-    @State private var genre: String = ""
+    @State private var coverUrl: String
+    @State private var title: String
+    @State private var series: String
+    @State private var seriesNumber: String
+    @State private var author: String
+    @State private var pageCount: String
+    @State private var synopsis: String
+    @State private var genre: String
+    
+    init(book: Book, onSave: @escaping () -> Void, onCancel: @escaping () -> Void) {
+        self.book = book
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _coverUrl = State(initialValue: book.coverUrl ?? "")
+        _title = State(initialValue: book.title)
+        _series = State(initialValue: book.series ?? "")
+        _seriesNumber = State(initialValue: book.seriesNumber != nil ? String(book.seriesNumber!) : "")
+        _author = State(initialValue: book.author)
+        _pageCount = State(initialValue: String(book.pageCount))
+        _synopsis = State(initialValue: book.synopsis ?? "")
+        _genre = State(initialValue: book.genre ?? "")
+    }
     
     var body: some View {
         HStack(spacing: 0) {
@@ -65,11 +80,11 @@ struct AddBookModal: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    Text("Add New Book")
+                    Text("Edit Book")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                         .foregroundStyle(
                             LinearGradient(
-                                colors: [.blue, .purple],
+                                colors: [.orange, .pink],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -165,7 +180,7 @@ struct AddBookModal: View {
                 
                 // Action Buttons
                 HStack(spacing: 12) {
-                    Button(action: { isPresented = false }) {
+                    Button(action: onCancel) {
                         Text("Cancel")
                             .font(.system(size: 14, weight: .semibold, design: .rounded))
                             .foregroundColor(.secondary)
@@ -177,21 +192,21 @@ struct AddBookModal: View {
                     .buttonStyle(.plain)
                     .keyboardShortcut(.cancelAction)
                     
-                    Button(action: addBook) {
-                        Text("Add Book")
+                    Button(action: saveBook) {
+                        Text("Save Changes")
                             .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(
                                 LinearGradient(
-                                    colors: isFormValid ? [Color(hex: "667eea"), Color(hex: "764ba2")] : [Color.secondary, Color.secondary],
+                                    colors: isFormValid ? [Color(hex: "f093fb"), Color(hex: "f5576c")] : [Color.secondary, Color.secondary],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .shadow(color: isFormValid ? Color(hex: "667eea").opacity(0.4) : Color.clear, radius: 8, x: 0, y: 4)
+                            .shadow(color: isFormValid ? Color(hex: "f5576c").opacity(0.4) : Color.clear, radius: 8, x: 0, y: 4)
                     }
                     .buttonStyle(.plain)
                     .keyboardShortcut(.defaultAction)
@@ -234,12 +249,13 @@ struct AddBookModal: View {
         !title.isEmpty && !author.isEmpty && Int(pageCount) != nil
     }
     
-    private func addBook() {
+    private func saveBook() {
         guard let pages = Int(pageCount) else { return }
         
         let seriesNum = Double(seriesNumber)
         
-        let success = dbManager.addBook(
+        _ = dbManager.updateBook(
+            id: book.id,
             coverUrl: coverUrl.isEmpty ? nil : coverUrl,
             title: title,
             series: series.isEmpty ? nil : series,
@@ -250,43 +266,15 @@ struct AddBookModal: View {
             genre: genre.isEmpty ? nil : genre
         )
         
-        if success {
-            isPresented = false
-            onSave()
-        }
-    }
-}
-
-// MARK: - Modern Text Field
-
-struct ModernTextField: View {
-    let label: String
-    let placeholder: String
-    @Binding var text: String
-    let icon: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(label, systemImage: icon)
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundColor(.secondary)
-            
-            TextField(placeholder, text: $text)
-                .textFieldStyle(.plain)
-                .font(.system(size: 13, design: .rounded))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color(nsColor: .textBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
-                )
-        }
+        onSave()
     }
 }
 
 #Preview {
-    AddBookModal(isPresented: .constant(true), onSave: {})
-        .environmentObject(DatabaseManager.shared)
+    EditBookModal(
+        book: Book(id: 1, title: "Test Book", author: "Test Author", pageCount: 300, dateAdded: Date()),
+        onSave: {},
+        onCancel: {}
+    )
+    .environmentObject(DatabaseManager.shared)
 }

@@ -2,7 +2,7 @@
 //  AbandonedBooksView.swift
 //  Booklet
 //
-//  View for abandoned books with reasons and abandonment details
+//  View for abandoned books with modern design
 //
 
 import SwiftUI
@@ -42,84 +42,89 @@ struct AbandonedBooksView: View {
             // Header
             HStack {
                 Text("Abandoned Books")
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.red, .orange],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
                 Spacer()
             }
-            .padding(20)
+            .padding(24)
+            .padding(.bottom, 8)
+            
+            Divider()
             
             // Search and Sort Bar
             HStack(spacing: 15) {
-                TextField("Search abandoned books...", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 300)
-                    .onChange(of: searchText) { _, _ in
-                        filterAndSortBooks()
-                    }
-                
-                Spacer()
-                
-                Text("Sort by:")
-                    .font(.system(size: 13))
-                
-                Picker("", selection: $sortOption) {
-                    ForEach(SortOption.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
-                    }
+                // Search bar
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14))
+                    
+                    TextField("Search abandoned books...", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 14, design: .rounded))
                 }
-                .pickerStyle(.menu)
-                .frame(width: 150)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+                .onChange(of: searchText) { _, _ in
+                    filterAndSortBooks()
+                }
+                
+                // Sort selector
+                HStack(spacing: 8) {
+                    Text("Sort:")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
+                    
+                    Picker("", selection: $sortOption) {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .font(.system(size: 13, design: .rounded))
+                    .frame(width: 150)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
                 .onChange(of: sortOption) { _, _ in
                     filterAndSortBooks()
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 15)
-            
-            Divider()
-            
-            // Table Header
-            HStack(spacing: 10) {
-                Text("Cover")
-                    .frame(width: 60, alignment: .leading)
-                Text("Title")
-                    .frame(width: 160, alignment: .leading)
-                Text("Series")
-                    .frame(width: 120, alignment: .leading)
-                Text("Author")
-                    .frame(width: 120, alignment: .leading)
-                Text("Genre")
-                    .frame(width: 100, alignment: .leading)
-                Text("Pages")
-                    .frame(width: 60, alignment: .leading)
-                Text("Page Stopped")
-                    .frame(width: 90, alignment: .leading)
-                Text("Abandoned")
-                    .frame(width: 100, alignment: .leading)
-                Text("Actions")
-                    .frame(width: 150, alignment: .leading)
-            }
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
-            .background(Color(nsColor: .controlBackgroundColor))
-            
-            Divider()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
             
             // Table Content
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(paginatedBooks) { abandoned in
+                    ForEach(Array(paginatedBooks.enumerated()), id: \.element.id) { index, abandoned in
                         if let book = abandoned.book {
                             AbandonedBookRow(
                                 abandoned: abandoned,
                                 book: book,
+                                isAlternate: index % 2 != 0,
                                 navigationPath: $navigationPath,
                                 onEdit: { bookToEdit = abandoned },
                                 onRemove: { bookToRemove = abandoned }
                             )
-                            Divider()
                         }
                     }
                 }
@@ -128,16 +133,17 @@ struct AbandonedBooksView: View {
             Divider()
             
             // Pagination Controls
-            HStack {
+            HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
-                HStack(spacing: 10) {
-                    Text("Rows per page:")
-                        .font(.system(size: 13))
+                HStack(spacing: 12) {
+                    Text("Rows:")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
                     
                     Picker("", selection: $rowsPerPage) {
                         Text("50").tag(50)
@@ -145,28 +151,47 @@ struct AbandonedBooksView: View {
                         Text("200").tag(200)
                     }
                     .pickerStyle(.menu)
-                    .frame(width: 80)
+                    .font(.system(size: 13, design: .rounded))
+                    .frame(width: 70)
                     .onChange(of: rowsPerPage) { _, _ in
                         currentPage = 0
                     }
                     
+                    Divider()
+                        .frame(height: 20)
+                    
                     Button(action: { currentPage = max(0, currentPage - 1) }) {
                         Image(systemName: "chevron.left")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(currentPage == 0 ? .secondary.opacity(0.5) : .primary)
+                            .frame(width: 28, height: 28)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .disabled(currentPage == 0)
                     
                     Text("Page \(currentPage + 1) of \(totalPages)")
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
                         .frame(width: 100)
                     
                     Button(action: { currentPage = min(totalPages - 1, currentPage + 1) }) {
                         Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(currentPage >= totalPages - 1 ? .secondary.opacity(0.5) : .primary)
+                            .frame(width: 28, height: 28)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .disabled(currentPage >= totalPages - 1)
                 }
             }
-            .padding(15)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
         }
+        .background(Color(nsColor: .textBackgroundColor))
         .sheet(item: $bookToEdit) { abandoned in
             EditAbandonedBookModal(
                 abandoned: abandoned,
@@ -239,12 +264,17 @@ struct AbandonedBooksView: View {
     }
 }
 
+// MARK: - Abandoned Book Row
+
 struct AbandonedBookRow: View {
     let abandoned: AbandonedBook
     let book: Book
+    let isAlternate: Bool
     @Binding var navigationPath: NavigationPath
     let onEdit: () -> Void
     let onRemove: () -> Void
+    
+    @State private var isHovered: Bool = false
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -254,34 +284,35 @@ struct AbandonedBookRow: View {
     }()
     
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 16) {
             // Cover
-            if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
+            Group {
+                if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.2))
+                    }
+                } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color.secondary.opacity(0.2))
                 }
-                .frame(width: 40, height: 60)
-                .cornerRadius(4)
-            } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 40, height: 60)
-                    .cornerRadius(4)
             }
+            .frame(width: 45, height: 68)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
             
             // Title (clickable)
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
                 Text(book.title)
-                    .font(.system(size: 13))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
-                    .frame(width: 160, alignment: .leading)
+                    .frame(width: 180, alignment: .leading)
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
@@ -292,16 +323,16 @@ struct AbandonedBookRow: View {
                     navigationPath.append(NavigationDestination.series(name: series))
                 }) {
                     Text(book.seriesDisplay ?? series)
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, design: .rounded))
                         .foregroundColor(.blue)
                         .frame(width: 120, alignment: .leading)
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("-")
+                Text("—")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 120, alignment: .leading)
             }
             
@@ -310,7 +341,7 @@ struct AbandonedBookRow: View {
                 navigationPath.append(NavigationDestination.author(name: book.author))
             }) {
                 Text(book.author)
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundColor(.blue)
                     .frame(width: 120, alignment: .leading)
                     .lineLimit(1)
@@ -323,71 +354,99 @@ struct AbandonedBookRow: View {
                     navigationPath.append(NavigationDestination.genre(name: genre))
                 }) {
                     Text(genre)
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, design: .rounded))
                         .foregroundColor(.blue)
                         .frame(width: 100, alignment: .leading)
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("-")
+                Text("—")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 100, alignment: .leading)
             }
             
             // Page Count
             Text("\(book.pageCount)")
-                .font(.system(size: 13))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 60, alignment: .leading)
             
             // Page at Abandonment
             if let page = abandoned.pageAtAbandonment {
                 Text("\(page)")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundColor(.secondary)
-                    .frame(width: 90, alignment: .leading)
+                    .frame(width: 80, alignment: .leading)
             } else {
-                Text("-")
+                Text("—")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                    .frame(width: 90, alignment: .leading)
+                    .foregroundColor(.secondary.opacity(0.5))
+                    .frame(width: 80, alignment: .leading)
             }
             
             // Abandonment Date
             Text(dateFormatter.string(from: abandoned.abandonmentDate))
-                .font(.system(size: 13))
+                .font(.system(size: 13, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 100, alignment: .leading)
             
-            // Actions
+            Spacer()
+            
+            // Action Buttons
             HStack(spacing: 8) {
-                Button("Open") {
-                    navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
+                ActionButton(
+                    icon: "arrow.up.right.circle.fill",
+                    color: .blue,
+                    action: {
+                        navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
+                    },
+                    tooltip: "Open book details"
+                )
                 
-                Button("Edit") {
-                    onEdit()
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
+                ActionButton(
+                    icon: "pencil.circle.fill",
+                    color: .orange,
+                    action: onEdit,
+                    tooltip: "Edit abandonment details"
+                )
                 
-                Button("Remove") {
-                    onRemove()
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
-                .foregroundColor(.red)
+                ActionButton(
+                    icon: "trash.circle.fill",
+                    color: .red,
+                    action: onRemove,
+                    tooltip: "Remove from abandoned"
+                )
             }
-            .frame(width: 150, alignment: .leading)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 14)
+        .background(
+            isAlternate ? Color(nsColor: .controlBackgroundColor).opacity(0.5) : Color.clear
+        )
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+        .overlay(
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "eb3349").opacity(0.08), Color(hex: "f45c43").opacity(0.08)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .opacity(isHovered ? 1.0 : 0.0)
+                .allowsHitTesting(false)
+        )
     }
 }
+
+// MARK: - Edit Abandoned Book Modal
 
 struct EditAbandonedBookModal: View {
     let abandoned: AbandonedBook
@@ -411,51 +470,133 @@ struct EditAbandonedBookModal: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Edit Abandoned Book")
-                .font(.system(size: 20, weight: .semibold))
-            
-            if let book = abandoned.book {
-                Text(book.title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-            
-            Form {
-                TextField("Page at Abandonment", text: $pageAtAbandonment)
-                    .textFieldStyle(.roundedBorder)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Reason")
-                        .font(.system(size: 14, weight: .medium))
-                    
-                    TextEditor(text: $reason)
-                        .frame(height: 100)
-                        .border(Color.gray.opacity(0.3), width: 1)
-                }
-                
-                DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
-                
-                DatePicker("Abandonment Date", selection: $abandonmentDate, displayedComponents: .date)
-            }
-            
+        VStack(spacing: 0) {
+            // Header
             HStack {
-                Button("Cancel") {
-                    onCancel()
-                }
-                .keyboardShortcut(.cancelAction)
+                Text("Edit Abandoned Book")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.red, .orange],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
                 Spacer()
-                
-                Button("Save") {
-                    saveChanges()
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 24)
+            .padding(.bottom, 20)
+            
+            Divider()
+            
+            VStack(spacing: 24) {
+                if let book = abandoned.book {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(book.title)
+                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                            .foregroundColor(.primary)
+                        
+                        Text("by \(book.author)")
+                            .font(.system(size: 15, design: .rounded))
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .buttonStyle(.borderedProminent)
+                
+                Divider()
+                
+                // Page at Abandonment
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Page at Abandonment", systemImage: "book.pages")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Page number", text: $pageAtAbandonment)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 14, design: .rounded))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(Color(nsColor: .textBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
+                }
+                
+                // Reason
+                VStack(alignment: .leading, spacing: 12) {
+                    Label("Reason", systemImage: "text.alignleft")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                    
+                    TextEditor(text: $reason)
+                        .font(.system(size: 14, design: .rounded))
+                        .frame(height: 100)
+                        .padding(12)
+                        .background(Color(nsColor: .textBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                        )
+                }
+                
+                // Dates
+                VStack(alignment: .leading, spacing: 16) {
+                    DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                        .font(.system(size: 14, design: .rounded))
+                    
+                    DatePicker("Abandonment Date", selection: $abandonmentDate, displayedComponents: .date)
+                        .font(.system(size: 14, design: .rounded))
+                }
+            }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 24)
+            
+            Divider()
+            
+            // Action Buttons
+            HStack(spacing: 12) {
+                Button(action: onCancel) {
+                    Text("Cancel")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(nsColor: .controlBackgroundColor))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+                
+                Button(action: saveChanges) {
+                    Text("Save Changes")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(
+                            LinearGradient(
+                                colors: [Color(hex: "eb3349"), Color(hex: "f45c43")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .shadow(color: Color(hex: "eb3349").opacity(0.4), radius: 8, x: 0, y: 4)
+                }
+                .buttonStyle(.plain)
                 .keyboardShortcut(.defaultAction)
             }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 20)
         }
-        .padding(30)
-        .frame(width: 500)
+        .frame(width: 550)
+        .background(Color(nsColor: .textBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     
     private func saveChanges() {

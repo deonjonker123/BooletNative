@@ -2,7 +2,7 @@
 //  LibraryView.swift
 //  Booklet
 //
-//  Library page with all books in table layout
+//  Modern library view with enhanced visuals
 //
 
 import SwiftUI
@@ -44,84 +44,110 @@ struct LibraryView: View {
             // Header
             HStack {
                 Text("Library")
-                    .font(.system(size: 32, weight: .bold))
+                    .font(.system(size: 38, weight: .bold, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
                 
                 Spacer()
                 
-                Button("Add Book") {
-                    showAddBookModal = true
+                Button(action: { showAddBookModal = true }) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("Add Book")
+                            .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(
+                        LinearGradient(
+                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+                    .shadow(color: Color(hex: "667eea").opacity(0.4), radius: 8, x: 0, y: 4)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.plain)
             }
-            .padding(20)
+            .padding(24)
+            .padding(.bottom, 8)
+            
+            Divider()
             
             // Search and Sort Bar
             HStack(spacing: 15) {
-                TextField("Search library...", text: $searchText)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(width: 300)
-                    .onChange(of: searchText) { _, _ in
-                        filterAndSortBooks()
-                    }
-                
-                Spacer()
-                
-                Text("Sort by:")
-                    .font(.system(size: 13))
-                
-                Picker("", selection: $sortOption) {
-                    ForEach(SortOption.allCases, id: \.self) { option in
-                        Text(option.rawValue).tag(option)
-                    }
+                // Search bar - full width
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                        .font(.system(size: 14))
+                    
+                    TextField("Search library...", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 14, design: .rounded))
                 }
-                .pickerStyle(.menu)
-                .frame(width: 150)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
+                .onChange(of: searchText) { _, _ in
+                    filterAndSortBooks()
+                }
+                
+                // Sort selector
+                HStack(spacing: 8) {
+                    Text("Sort:")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
+                    
+                    Picker("", selection: $sortOption) {
+                        ForEach(SortOption.allCases, id: \.self) { option in
+                            Text(option.rawValue).tag(option)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .font(.system(size: 13, design: .rounded))
+                    .frame(width: 150)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
+                )
                 .onChange(of: sortOption) { _, _ in
                     filterAndSortBooks()
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 15)
-            
-            Divider()
-            
-            // Table Header
-            HStack(spacing: 10) {
-                Text("Cover")
-                    .frame(width: 60, alignment: .leading)
-                Text("Title")
-                    .frame(width: 200, alignment: .leading)
-                Text("Series")
-                    .frame(width: 150, alignment: .leading)
-                Text("Author")
-                    .frame(width: 150, alignment: .leading)
-                Text("Genre")
-                    .frame(width: 120, alignment: .leading)
-                Text("Pages")
-                    .frame(width: 60, alignment: .leading)
-                Text("Actions")
-                    .frame(width: 280, alignment: .leading)
-            }
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(.secondary)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
-            .background(Color(nsColor: .controlBackgroundColor))
-            
-            Divider()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
             
             // Table Content
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(paginatedBooks) { book in
-                        BookRow(
+                    ForEach(Array(paginatedBooks.enumerated()), id: \.element.id) { index, book in
+                        ModernBookRow(
                             book: book,
+                            isAlternate: index % 2 != 0,
                             navigationPath: $navigationPath,
                             onEdit: { bookToEdit = book },
                             onRead: { bookToRead = book },
                             onDelete: { bookToDelete = book }
                         )
-                        Divider()
                     }
                 }
             }
@@ -129,16 +155,17 @@ struct LibraryView: View {
             Divider()
             
             // Pagination Controls
-            HStack {
+            HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
-                HStack(spacing: 10) {
-                    Text("Rows per page:")
-                        .font(.system(size: 13))
+                HStack(spacing: 12) {
+                    Text("Rows:")
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
                     
                     Picker("", selection: $rowsPerPage) {
                         Text("50").tag(50)
@@ -146,28 +173,47 @@ struct LibraryView: View {
                         Text("200").tag(200)
                     }
                     .pickerStyle(.menu)
-                    .frame(width: 80)
+                    .font(.system(size: 13, design: .rounded))
+                    .frame(width: 70)
                     .onChange(of: rowsPerPage) { _, _ in
                         currentPage = 0
                     }
                     
+                    Divider()
+                        .frame(height: 20)
+                    
                     Button(action: { currentPage = max(0, currentPage - 1) }) {
                         Image(systemName: "chevron.left")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(currentPage == 0 ? .secondary.opacity(0.5) : .primary)
+                            .frame(width: 28, height: 28)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .disabled(currentPage == 0)
                     
                     Text("Page \(currentPage + 1) of \(totalPages)")
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .foregroundColor(.secondary)
                         .frame(width: 100)
                     
                     Button(action: { currentPage = min(totalPages - 1, currentPage + 1) }) {
                         Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(currentPage >= totalPages - 1 ? .secondary.opacity(0.5) : .primary)
+                            .frame(width: 28, height: 28)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .disabled(currentPage >= totalPages - 1)
                 }
             }
-            .padding(15)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
         }
+        .background(Color(nsColor: .textBackgroundColor))
         .sheet(isPresented: $showAddBookModal) {
             AddBookModal(isPresented: $showAddBookModal, onSave: {
                 loadBooks()
@@ -273,42 +319,48 @@ struct LibraryView: View {
     }
 }
 
-struct BookRow: View {
+// MARK: - Modern Book Row
+
+struct ModernBookRow: View {
     let book: Book
+    let isAlternate: Bool
     @Binding var navigationPath: NavigationPath
     let onEdit: () -> Void
     let onRead: () -> Void
     let onDelete: () -> Void
     
+    @State private var isHovered: Bool = false
+    
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 16) {
             // Cover
-            if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
+            Group {
+                if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color.secondary.opacity(0.2))
+                    }
+                } else {
                     Rectangle()
-                        .fill(Color.gray.opacity(0.3))
+                        .fill(Color.secondary.opacity(0.2))
                 }
-                .frame(width: 40, height: 60)
-                .cornerRadius(4)
-            } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 40, height: 60)
-                    .cornerRadius(4)
             }
+            .frame(width: 45, height: 68)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
             
             // Title (clickable)
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
                 Text(book.title)
-                    .font(.system(size: 13))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
-                    .frame(width: 200, alignment: .leading)
+                    .frame(width: 220, alignment: .leading)
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
@@ -319,16 +371,16 @@ struct BookRow: View {
                     navigationPath.append(NavigationDestination.series(name: series))
                 }) {
                     Text(book.seriesDisplay ?? series)
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, design: .rounded))
                         .foregroundColor(.blue)
                         .frame(width: 150, alignment: .leading)
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("-")
+                Text("—")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 150, alignment: .leading)
             }
             
@@ -337,7 +389,7 @@ struct BookRow: View {
                 navigationPath.append(NavigationDestination.author(name: book.author))
             }) {
                 Text(book.author)
-                    .font(.system(size: 13))
+                    .font(.system(size: 13, design: .rounded))
                     .foregroundColor(.blue)
                     .frame(width: 150, alignment: .leading)
                     .lineLimit(1)
@@ -350,143 +402,118 @@ struct BookRow: View {
                     navigationPath.append(NavigationDestination.genre(name: genre))
                 }) {
                     Text(genre)
-                        .font(.system(size: 13))
+                        .font(.system(size: 13, design: .rounded))
                         .foregroundColor(.blue)
                         .frame(width: 120, alignment: .leading)
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)
             } else {
-                Text("-")
+                Text("—")
                     .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 120, alignment: .leading)
             }
             
             // Page Count
             Text("\(book.pageCount)")
-                .font(.system(size: 13))
+                .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
-                .frame(width: 60, alignment: .leading)
+                .frame(width: 70, alignment: .leading)
             
-            // Actions
+            Spacer()
+            
+            // Action Buttons
             HStack(spacing: 8) {
-                Button("Open") {
-                    navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
+                ActionButton(
+                    icon: "arrow.up.right.circle.fill",
+                    color: .blue,
+                    action: {
+                        navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
+                    },
+                    tooltip: "Open book details"
+                )
                 
-                Button("Edit") {
-                    onEdit()
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
+                ActionButton(
+                    icon: "pencil.circle.fill",
+                    color: .orange,
+                    action: onEdit,
+                    tooltip: "Edit book"
+                )
                 
-                Button("Read") {
-                    onRead()
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
+                ActionButton(
+                    icon: "book.circle.fill",
+                    color: .green,
+                    action: onRead,
+                    tooltip: "Start reading"
+                )
                 
-                Button("Delete") {
-                    onDelete()
-                }
-                .buttonStyle(.borderless)
-                .font(.system(size: 12))
-                .foregroundColor(.red)
+                ActionButton(
+                    icon: "trash.circle.fill",
+                    color: .red,
+                    action: onDelete,
+                    tooltip: "Delete book"
+                )
             }
-            .frame(width: 280, alignment: .leading)
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 14)
+        .background(
+            isAlternate ? Color(nsColor: .controlBackgroundColor).opacity(0.5) : Color.clear
+        )
+        .contentShape(Rectangle())
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isHovered = hovering
+            }
+        }
+        .overlay(
+            Rectangle()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: "667eea").opacity(0.08), Color(hex: "764ba2").opacity(0.08)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .opacity(isHovered ? 1.0 : 0.0)
+                .allowsHitTesting(false)
+        )
     }
 }
 
-struct EditBookModal: View {
-    let book: Book
-    let onSave: () -> Void
-    let onCancel: () -> Void
+// MARK: - Action Button
+
+struct ActionButton: View {
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    let tooltip: String
     
-    @EnvironmentObject var dbManager: DatabaseManager
-    @State private var coverUrl: String
-    @State private var title: String
-    @State private var series: String
-    @State private var seriesNumber: String
-    @State private var author: String
-    @State private var pageCount: String
-    @State private var synopsis: String
-    @State private var genre: String
-    
-    init(book: Book, onSave: @escaping () -> Void, onCancel: @escaping () -> Void) {
-        self.book = book
-        self.onSave = onSave
-        self.onCancel = onCancel
-        _coverUrl = State(initialValue: book.coverUrl ?? "")
-        _title = State(initialValue: book.title)
-        _series = State(initialValue: book.series ?? "")
-        _seriesNumber = State(initialValue: book.seriesNumber != nil ? String(book.seriesNumber!) : "")
-        _author = State(initialValue: book.author)
-        _pageCount = State(initialValue: String(book.pageCount))
-        _synopsis = State(initialValue: book.synopsis ?? "")
-        _genre = State(initialValue: book.genre ?? "")
-    }
+    @State private var isHovered: Bool = false
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Edit Book")
-                .font(.system(size: 20, weight: .semibold))
-            
-            Form {
-                TextField("Cover URL", text: $coverUrl)
-                TextField("Title", text: $title)
-                TextField("Series", text: $series)
-                TextField("Series Number", text: $seriesNumber)
-                TextField("Author", text: $author)
-                TextField("Page Count", text: $pageCount)
-                TextField("Genre", text: $genre)
-                TextField("Synopsis", text: $synopsis, axis: .vertical)
-                    .lineLimit(4...8)
-            }
-            .textFieldStyle(.roundedBorder)
-            
-            HStack {
-                Button("Cancel") {
-                    onCancel()
-                }
-                .keyboardShortcut(.cancelAction)
-                
-                Spacer()
-                
-                Button("Save") {
-                    saveBook()
-                }
-                .buttonStyle(.borderedProminent)
-                .keyboardShortcut(.defaultAction)
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(isHovered ? .white : color)
+                .frame(width: 32, height: 32)
+                .background(
+                    Circle()
+                        .fill(isHovered ? color : color.opacity(0.12))
+                )
+                .overlay(
+                    Circle()
+                        .stroke(color.opacity(isHovered ? 0 : 0.3), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .help(tooltip)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
             }
         }
-        .padding(30)
-        .frame(width: 500)
-    }
-    
-    private func saveBook() {
-        guard let pages = Int(pageCount) else { return }
-        
-        let seriesNum = Double(seriesNumber)
-        
-        _ = dbManager.updateBook(
-            id: book.id,
-            coverUrl: coverUrl.isEmpty ? nil : coverUrl,
-            title: title,
-            series: series.isEmpty ? nil : series,
-            seriesNumber: seriesNum,
-            author: author,
-            pageCount: pages,
-            synopsis: synopsis.isEmpty ? nil : synopsis,
-            genre: genre.isEmpty ? nil : genre
-        )
-        
-        onSave()
     }
 }
 

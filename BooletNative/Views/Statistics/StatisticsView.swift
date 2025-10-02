@@ -154,6 +154,15 @@ struct StatisticsView: View {
                         icon: "checkmark.seal.fill",
                         gradient: [Color(hex: "11998e"), Color(hex: "38ef7d")]
                     )
+                    .onTapGesture {
+                        navigationPath.append(
+                            NavigationDestination.filteredCompleted(
+                                filterType: .author,
+                                filterValue: "",
+                                timePeriod: selectedYear
+                            )
+                        )
+                    }
                     
                     StatsStatCard(
                         title: "Pages Read",
@@ -161,6 +170,15 @@ struct StatisticsView: View {
                         icon: "book.pages.fill",
                         gradient: [Color(hex: "667eea"), Color(hex: "764ba2")]
                     )
+                    .onTapGesture {
+                        navigationPath.append(
+                            NavigationDestination.filteredCompleted(
+                                filterType: .author,
+                                filterValue: "",
+                                timePeriod: selectedYear
+                            )
+                        )
+                    }
                     
                     StatsStatCard(
                         title: "Abandoned",
@@ -168,6 +186,11 @@ struct StatisticsView: View {
                         icon: "xmark.circle.fill",
                         gradient: [Color(hex: "eb3349"), Color(hex: "f45c43")]
                     )
+                    .onTapGesture {
+                        navigationPath.append(
+                                NavigationDestination.abandonedBooks
+                            )
+                    }
                     
                     if let avgDays = averageTimeToFinish {
                         StatsStatCard(
@@ -189,33 +212,92 @@ struct StatisticsView: View {
                 
                 // Charts Section
                 VStack(spacing: 24) {
-                    // Reading Activity Over Time
+                    // Reading Activity - CLICKABLE TWO BAR CHARTS (Year Filter)
                     if !filteredBooks.isEmpty {
-                        ChartCard(title: "Reading Activity", icon: "chart.bar.fill") {
-                            Chart {
-                                ForEach(monthlyStats, id: \.month) { stat in
-                                    BarMark(
-                                        x: .value("Month", stat.monthName),
-                                        y: .value("Books", stat.booksCount)
-                                    )
-                                    .foregroundStyle(
-                                        LinearGradient(
-                                            colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
-                                            startPoint: .bottom,
-                                            endPoint: .top
+                        VStack(spacing: 32) {
+                            // Pages Read per Month
+                            ChartCard(title: "Pages Read", icon: "book.fill") {
+                                Chart {
+                                    ForEach(monthlyStats, id: \.month) { stat in
+                                        BarMark(
+                                            x: .value("Month", stat.monthName),
+                                            y: .value("Pages Read", stat.pagesCount)
                                         )
-                                    )
-                                    .cornerRadius(6)
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [Color(hex: "667eea"), Color(hex: "764ba2")],
+                                                startPoint: .bottom,
+                                                endPoint: .top
+                                            )
+                                        )
+                                        .cornerRadius(6)
+                                    }
+                                }
+                                .frame(height: 250)
+                                .chartYAxis {
+                                    AxisMarks(position: .leading)
+                                }
+                                .chartXAxis {
+                                    AxisMarks(values: monthlyStats.map { $0.monthName })
+                                }
+                                .chartOverlay { _ in
+                                    // Entire chart is tappable
+                                    Rectangle().fill(.clear).contentShape(Rectangle())
+                                        .onTapGesture {
+                                            navigationPath.append(
+                                                NavigationDestination.filteredCompleted(
+                                                    filterType: .author, // no filter, just all books
+                                                    filterValue: "",
+                                                    timePeriod: selectedYear
+                                                )
+                                            )
+                                        }
                                 }
                             }
-                            .frame(height: 250)
-                            .chartYAxis {
-                                AxisMarks(position: .leading)
+
+                            // Books Completed per Month
+                            ChartCard(title: "Books Completed", icon: "checkmark.seal.fill") {
+                                Chart {
+                                    ForEach(monthlyStats, id: \.month) { stat in
+                                        BarMark(
+                                            x: .value("Month", stat.monthName),
+                                            y: .value("Books Completed", stat.booksCount)
+                                        )
+                                        .foregroundStyle(
+                                            LinearGradient(
+                                                colors: [Color(hex: "f093fb"), Color(hex: "f5576c")],
+                                                startPoint: .bottom,
+                                                endPoint: .top
+                                            )
+                                        )
+                                        .cornerRadius(6)
+                                    }
+                                }
+                                .frame(height: 250)
+                                .chartYAxis {
+                                    AxisMarks(position: .leading)
+                                }
+                                .chartXAxis {
+                                    AxisMarks(values: monthlyStats.map { $0.monthName })
+                                }
+                                .chartOverlay { _ in
+                                    Rectangle().fill(.clear).contentShape(Rectangle())
+                                        .onTapGesture {
+                                            navigationPath.append(
+                                                NavigationDestination.filteredCompleted(
+                                                    filterType: .author,
+                                                    filterValue: "",
+                                                    timePeriod: selectedYear
+                                                )
+                                            )
+                                        }
+                                }
                             }
                         }
                     }
+
                     
-                    // Top Authors
+                    // Top Authors - CLICKABLE NORMAL BAR CHART
                     if !topAuthors.isEmpty {
                         ChartCard(title: "Top 10 Authors", icon: "person.3.fill") {
                             Chart {
@@ -234,14 +316,35 @@ struct StatisticsView: View {
                                     .cornerRadius(6)
                                 }
                             }
-                            .frame(height: 400)
+                            .frame(height: 600)
                             .chartXAxis {
                                 AxisMarks(position: .bottom)
                             }
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
+                            }
+                            .chartOverlay { proxy in
+                                GeometryReader { geo in
+                                    Rectangle().fill(.clear).contentShape(Rectangle())
+                                        .onTapGesture { location in
+                                            // map tap location to Y-axis (Author)
+                                            if let author = proxy.value(atY: location.y, as: String.self) {
+                                                navigationPath.append(
+                                                    NavigationDestination.filteredCompleted(
+                                                        filterType: .author,
+                                                        filterValue: author,
+                                                        timePeriod: selectedYear
+                                                    )
+                                                )
+                                            }
+                                        }
+                                }
+                            }
                         }
                     }
+
                     
-                    // Top Genres
+                    // Top Genres - CLICKABLE NORMAL BAR CHART
                     if !topGenres.isEmpty {
                         ChartCard(title: "Top 10 Genres", icon: "tag.fill") {
                             Chart {
@@ -264,10 +367,31 @@ struct StatisticsView: View {
                             .chartXAxis {
                                 AxisMarks(position: .bottom)
                             }
+                            .chartYAxis {
+                                AxisMarks(position: .leading)
+                            }
+                            .chartOverlay { proxy in
+                                GeometryReader { geo in
+                                    Rectangle().fill(.clear).contentShape(Rectangle())
+                                        .onTapGesture { location in
+                                            // map tap location to Y-axis (Genre)
+                                            if let genre = proxy.value(atY: location.y, as: String.self) {
+                                                navigationPath.append(
+                                                    NavigationDestination.filteredCompleted(
+                                                        filterType: .genre,
+                                                        filterValue: genre,
+                                                        timePeriod: selectedYear
+                                                    )
+                                                )
+                                            }
+                                        }
+                                }
+                            }
                         }
                     }
+
                     
-                    // Rating Distribution
+                    // Rating Distribution - CLICKABLE
                     if !ratingSplit.isEmpty {
                         ChartCard(title: "Rating Distribution", icon: "star.fill") {
                             Chart {
@@ -290,6 +414,31 @@ struct StatisticsView: View {
                             .chartYAxis {
                                 AxisMarks(position: .leading)
                             }
+                            .overlay(
+                                GeometryReader { geometry in
+                                    Color.clear
+                                        .contentShape(Rectangle())
+                                        .gesture(
+                                            DragGesture(minimumDistance: 0)
+                                                .onEnded { value in
+                                                    let location = value.location
+                                                    let barWidth = geometry.size.width / CGFloat(ratingSplit.count)
+                                                    let index = Int(location.x / barWidth)
+                                                    
+                                                    if index >= 0 && index < ratingSplit.count {
+                                                        let rating = ratingSplit[index].rating
+                                                        navigationPath.append(
+                                                            NavigationDestination.filteredCompleted(
+                                                                filterType: .rating,
+                                                                filterValue: String(rating),
+                                                                timePeriod: selectedYear
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                        )
+                                }
+                            )
                         }
                     }
                 }

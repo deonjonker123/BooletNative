@@ -49,7 +49,9 @@ struct DashboardView: View {
                         delay: 0.0
                     )
                     .onTapGesture {
-                        // Navigate to Library
+                        navigationPath.append(
+                                NavigationDestination.allBooks
+                            )
                     }
                     
                     ModernStatCard(
@@ -60,7 +62,9 @@ struct DashboardView: View {
                         delay: 0.1
                     )
                     .onTapGesture {
-                        // Navigate to Completed Books
+                        navigationPath.append(
+                                NavigationDestination.completedBooks
+                            )
                     }
                     
                     ModernStatCard(
@@ -71,7 +75,9 @@ struct DashboardView: View {
                         delay: 0.2
                     )
                     .onTapGesture {
-                        // Navigate to Abandoned Books
+                        navigationPath.append(
+                                NavigationDestination.abandonedBooks
+                            )
                     }
                 }
                 .padding(.horizontal, 32)

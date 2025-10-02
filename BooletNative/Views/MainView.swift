@@ -13,6 +13,10 @@ enum NavigationDestination: Hashable {
     case author(name: String)
     case series(name: String)
     case genre(name: String)
+    case filteredCompleted(filterType: CompletedBooksFilterType, filterValue: String, timePeriod: String)
+    case abandonedBooks
+    case allBooks
+    case completedBooks
 }
 
 struct MainView: View {
@@ -137,6 +141,19 @@ struct MainView: View {
                         SeriesView(seriesName: name, navigationPath: $navigationPath)
                     case .genre(let name):
                         GenreView(genreName: name, navigationPath: $navigationPath)
+                    case .filteredCompleted(let filterType, let filterValue, let timePeriod):
+                        FilteredCompletedBooksView(
+                            filterType: filterType,
+                            filterValue: filterValue,
+                            timePeriod: timePeriod,
+                            navigationPath: $navigationPath
+                        )
+                    case .abandonedBooks:
+                        AbandonedBooksView(navigationPath: $navigationPath)
+                    case .allBooks:
+                        LibraryView(navigationPath: $navigationPath)
+                    case .completedBooks:
+                        CompletedBooksView(navigationPath: $navigationPath)
                     }
                 }
             }

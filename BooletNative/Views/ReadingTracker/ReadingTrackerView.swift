@@ -14,8 +14,6 @@ struct ReadingTrackerView: View {
     @State private var entryToComplete: ReadingTrackerEntry?
     @State private var entryToAbandon: ReadingTrackerEntry?
     @State private var entryToRemove: ReadingTrackerEntry?
-    @State private var showCompleteModal: Bool = false
-    @State private var showAbandonModal: Bool = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -51,11 +49,9 @@ struct ReadingTrackerView: View {
                                     },
                                     onComplete: {
                                         entryToComplete = entry
-                                        showCompleteModal = true
                                     },
                                     onAbandon: {
                                         entryToAbandon = entry
-                                        showAbandonModal = true
                                     },
                                     onRemove: {
                                         entryToRemove = entry
@@ -68,51 +64,36 @@ struct ReadingTrackerView: View {
                 }
             }
         }
-        .sheet(isPresented: $showCompleteModal) {
-            if let entry = entryToComplete, let book = entry.book {
+        .sheet(item: $entryToComplete) { entry in
+            if let book = entry.book {
                 CompleteBookModal(
+                    isPresented: Binding(
+                        get: { entryToComplete != nil },
+                        set: { if !$0 { entryToComplete = nil } }
+                    ),
                     entry: entry,
                     book: book,
-                    onSave: { rating, review in
-                        _ = dbManager.completeBook(
-                            trackerId: entry.id,
-                            bookId: book.id,
-                            rating: rating,
-                            review: review,
-                            startDate: entry.startDate
-                        )
+                    dbManager: dbManager,
+                    onSave: {
                         loadTrackedBooks()
                         entryToComplete = nil
-                        showCompleteModal = false
-                    },
-                    onCancel: {
-                        entryToComplete = nil
-                        showCompleteModal = false
                     }
                 )
-                .environmentObject(dbManager)
             }
         }
-        .sheet(isPresented: $showAbandonModal) {
-            if let entry = entryToAbandon, let book = entry.book {
+        .sheet(item: $entryToAbandon) { entry in
+            if let book = entry.book {
                 AbandonBookModal(
+                    isPresented: Binding(
+                        get: { entryToAbandon != nil },
+                        set: { if !$0 { entryToAbandon = nil } }
+                    ),
                     entry: entry,
                     book: book,
-                    onSave: { reason in
-                        _ = dbManager.abandonBook(
-                            trackerId: entry.id,
-                            bookId: book.id,
-                            pageAtAbandonment: entry.currentPage,
-                            reason: reason,
-                            startDate: entry.startDate
-                        )
+                    dbManager: dbManager,
+                    onSave: {
                         loadTrackedBooks()
                         entryToAbandon = nil
-                        showAbandonModal = false
-                    },
-                    onCancel: {
-                        entryToAbandon = nil
-                        showAbandonModal = false
                     }
                 )
             }
@@ -308,10 +289,11 @@ struct TrackedBookCard: View {
 }
 
 struct CompleteBookModal: View {
+    @Binding var isPresented: Bool
     let entry: ReadingTrackerEntry
     let book: Book
-    let onSave: (Int?, String?) -> Void
-    let onCancel: () -> Void
+    let dbManager: DatabaseManager
+    let onSave: () -> Void
     
     @State private var rating: Int = 3
     @State private var review: String = ""
@@ -321,46 +303,43 @@ struct CompleteBookModal: View {
             Text("Complete Book")
                 .font(.system(size: 20, weight: .semibold))
             
-            VStack(alignment: .leading, spacing: 15) {
+            Form {
                 Text(book.title)
                     .font(.system(size: 16, weight: .medium))
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Rating")
+                Text("by \(book.author)")
+                    .foregroundColor(.secondary)
+                
+                Divider()
+                
+                HStack(spacing: 8) {
+                    Text("Rating:")
                         .font(.system(size: 14, weight: .medium))
-                    
-                    HStack(spacing: 8) {
-                        ForEach(1...5, id: \.self) { star in
-                            Button(action: { rating = star }) {
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .font(.system(size: 24))
-                                    .foregroundColor(star <= rating ? .yellow : .gray)
-                            }
-                            .buttonStyle(.plain)
+                    ForEach(1...5, id: \.self) { star in
+                        Button(action: { rating = star }) {
+                            Image(systemName: star <= rating ? "star.fill" : "star")
+                                .font(.system(size: 20))
+                                .foregroundColor(star <= rating ? .yellow : .gray)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Review (Optional)")
-                        .font(.system(size: 14, weight: .medium))
-                    
-                    TextEditor(text: $review)
-                        .frame(height: 120)
-                        .border(Color.gray.opacity(0.3), width: 1)
-                }
+                TextField("Review (Optional)", text: $review, axis: .vertical)
+                    .lineLimit(4...8)
             }
+            .textFieldStyle(.roundedBorder)
             
             HStack {
                 Button("Cancel") {
-                    onCancel()
+                    isPresented = false
                 }
                 .keyboardShortcut(.cancelAction)
                 
                 Spacer()
                 
-                Button("Complete") {
-                    onSave(rating, review.isEmpty ? nil : review)
+                Button("Complete Book") {
+                    completeBook()
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
@@ -369,13 +348,29 @@ struct CompleteBookModal: View {
         .padding(30)
         .frame(width: 500)
     }
+    
+    private func completeBook() {
+        let success = dbManager.completeBook(
+            trackerId: entry.id,
+            bookId: book.id,
+            rating: rating,
+            review: review.isEmpty ? nil : review,
+            startDate: entry.startDate
+        )
+        
+        if success {
+            isPresented = false
+            onSave()
+        }
+    }
 }
 
 struct AbandonBookModal: View {
+    @Binding var isPresented: Bool
     let entry: ReadingTrackerEntry
     let book: Book
-    let onSave: (String?) -> Void
-    let onCancel: () -> Void
+    let dbManager: DatabaseManager
+    let onSave: () -> Void
     
     @State private var reason: String = ""
     
@@ -384,34 +379,33 @@ struct AbandonBookModal: View {
             Text("Abandon Book")
                 .font(.system(size: 20, weight: .semibold))
             
-            VStack(alignment: .leading, spacing: 15) {
+            Form {
                 Text(book.title)
                     .font(.system(size: 16, weight: .medium))
                 
-                Text("Current Page: \(entry.currentPage) / \(book.pageCount)")
-                    .font(.system(size: 14))
+                Text("by \(book.author)")
                     .foregroundColor(.secondary)
                 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Reason (Optional)")
-                        .font(.system(size: 14, weight: .medium))
-                    
-                    TextEditor(text: $reason)
-                        .frame(height: 120)
-                        .border(Color.gray.opacity(0.3), width: 1)
-                }
+                Text("Current page: \(entry.currentPage) / \(book.pageCount)")
+                    .foregroundColor(.secondary)
+                
+                Divider()
+                
+                TextField("Reason (Optional)", text: $reason, axis: .vertical)
+                    .lineLimit(4...8)
             }
+            .textFieldStyle(.roundedBorder)
             
             HStack {
                 Button("Cancel") {
-                    onCancel()
+                    isPresented = false
                 }
                 .keyboardShortcut(.cancelAction)
                 
                 Spacer()
                 
-                Button("Abandon") {
-                    onSave(reason.isEmpty ? nil : reason)
+                Button("Abandon Book") {
+                    abandonBook()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.orange)
@@ -420,6 +414,21 @@ struct AbandonBookModal: View {
         }
         .padding(30)
         .frame(width: 500)
+    }
+    
+    private func abandonBook() {
+        let success = dbManager.abandonBook(
+            trackerId: entry.id,
+            bookId: book.id,
+            pageAtAbandonment: entry.currentPage,
+            reason: reason.isEmpty ? nil : reason,
+            startDate: entry.startDate
+        )
+        
+        if success {
+            isPresented = false
+            onSave()
+        }
     }
 }
 

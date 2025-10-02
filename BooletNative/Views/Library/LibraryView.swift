@@ -191,6 +191,7 @@ struct LibraryView: View {
             Button("Confirm") {
                 if let book = bookToRead {
                     _ = dbManager.addToReadingTracker(bookId: book.id)
+                    loadBooks()
                     bookToRead = nil
                 }
             }
@@ -224,7 +225,21 @@ struct LibraryView: View {
     }
     
     private func loadBooks() {
-        books = dbManager.getAllBooks()
+        // Get all books
+        let allBooks = dbManager.getAllBooks()
+        
+        // Get books that are in other locations
+        let trackedBookIds = Set(dbManager.getAllTrackedBooks().map { $0.bookId })
+        let completedBookIds = Set(dbManager.getAllCompletedBooks().map { $0.bookId })
+        let abandonedBookIds = Set(dbManager.getAllAbandonedBooks().map { $0.bookId })
+        
+        // Filter to only books that are NOT in tracker, completed, or abandoned
+        books = allBooks.filter { book in
+            !trackedBookIds.contains(book.id) &&
+            !completedBookIds.contains(book.id) &&
+            !abandonedBookIds.contains(book.id)
+        }
+        
         filterAndSortBooks()
     }
     

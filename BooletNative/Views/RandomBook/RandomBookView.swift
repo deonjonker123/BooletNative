@@ -214,12 +214,6 @@ struct RandomBookView: View {
                                 .buttonStyle(.borderedProminent)
                                 .tint(.green)
                             }
-                            
-                            Button("Choose Another") {
-                                showConfirmReroll = true
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.orange)
                         }
                     }
                     .padding(25)
@@ -242,14 +236,6 @@ struct RandomBookView: View {
                 Text("Send \"\(book.title)\" to reading tracker?")
             }
         }
-        .alert("Choose Another Book?", isPresented: $showConfirmReroll) {
-            Button("Cancel", role: .cancel) {}
-            Button("Roll Again") {
-                selectRandomBook()
-            }
-        } message: {
-            Text("Select a new random book?")
-        }
     }
     
     private var locationColor: Color {
@@ -267,12 +253,23 @@ struct RandomBookView: View {
         let trackedBooks = dbManager.getAllTrackedBooks()
         let abandonedBooks = dbManager.getAllAbandonedBooks()
         
+        // Get IDs of non-library books
+        let completedIds = Set(completedBooks.map { $0.bookId })
+        let trackedIds = Set(trackedBooks.map { $0.bookId })
+        let abandonedIds = Set(abandonedBooks.map { $0.bookId })
+        
+        // Only allow books that are in the library (not completed/tracked/abandoned)
+        let libraryBooks = allBooks.filter { book in
+            !completedIds.contains(book.id) &&
+            !trackedIds.contains(book.id) &&
+            !abandonedIds.contains(book.id)
+        }
+        
         // Get last completed book for rules
         let lastCompleted = completedBooks.first
         
         // Apply filters
-        var eligibleBooks = allBooks.filter { book in
-            // Apply user filters
+        var eligibleBooks = libraryBooks.filter { book in
             if !filterAuthor.isEmpty && !book.author.localizedCaseInsensitiveContains(filterAuthor) {
                 return false
             }
@@ -291,44 +288,29 @@ struct RandomBookView: View {
             
             // Smart rules based on last completed book
             if let last = lastCompleted, let lastBook = last.book {
-                // Don't select same genre
                 if book.genre == lastBook.genre && book.genre != nil {
                     return false
                 }
-                
-                // Don't select same author
                 if book.author == lastBook.author {
                     return false
                 }
-                
-                // Don't select same series
                 if book.series == lastBook.series && book.series != nil {
                     return false
                 }
-                
-                // If last book was > 800 pages, prefer books < 600 pages
                 if lastBook.pageCount > 800 && book.pageCount >= 600 {
                     return false
                 }
             }
             
-            // Series progression rule: don't select book N+1 if book N is not completed
-            if let series = book.series, let seriesNumber = book.seriesNumber {
-                // Check if previous books in series are completed
-                if seriesNumber > 1 {
-                    let previousNumber = seriesNumber - 1
-                    let previousCompleted = completedBooks.contains { completed in
-                        completed.book?.series == series && completed.book?.seriesNumber == previousNumber
-                    }
-                    
-                    // Only allow if:
-                    // 1. Previous book is completed, OR
-                    // 2. Last completed book is from this series (continuing series)
-                    let lastCompletedIsSameSeries = lastCompleted?.book?.series == series
-                    
-                    if !previousCompleted && !lastCompletedIsSameSeries {
-                        return false
-                    }
+            // Series progression rule
+            if let series = book.series, let seriesNumber = book.seriesNumber, seriesNumber > 1 {
+                let previousNumber = seriesNumber - 1
+                let previousCompleted = completedBooks.contains { completed in
+                    completed.book?.series == series && completed.book?.seriesNumber == previousNumber
+                }
+                let lastCompletedIsSameSeries = lastCompleted?.book?.series == series
+                if !previousCompleted && !lastCompletedIsSameSeries {
+                    return false
                 }
             }
             
@@ -338,21 +320,12 @@ struct RandomBookView: View {
         // Select random book
         if let randomBook = eligibleBooks.randomElement() {
             selectedBook = randomBook
-            
-            // Determine location
-            if trackedBooks.contains(where: { $0.bookId == randomBook.id }) {
-                bookLocation = .tracking
-            } else if completedBooks.contains(where: { $0.bookId == randomBook.id }) {
-                bookLocation = .completed
-            } else if abandonedBooks.contains(where: { $0.bookId == randomBook.id }) {
-                bookLocation = .abandoned
-            } else {
-                bookLocation = .library
-            }
+            bookLocation = .library // Always library since we filtered others out
         } else {
             selectedBook = nil
         }
     }
+
 }
 
 #Preview {

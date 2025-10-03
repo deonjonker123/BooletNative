@@ -512,36 +512,30 @@ class DatabaseManager: ObservableObject {
     }
     
     func createBackup(to destinationURL: URL) throws {
-            // Get the current database path
             let fileManager = FileManager.default
             let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let dbPath = documentsPath.appendingPathComponent("booklet.db")
-            
-            // Verify database exists
+
             guard fileManager.fileExists(atPath: dbPath.path) else {
                 throw BackupError.databaseNotFound
             }
-            
-            // Create temporary directory for backup preparation
+
             let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
             
             defer {
                 try? fileManager.removeItem(at: tempDir)
             }
-            
-            // Copy database to temp directory
+
             let tempDBPath = tempDir.appendingPathComponent("booklet.db")
             try fileManager.copyItem(at: dbPath, to: tempDBPath)
-            
-            // Create ZIP archive
+
             try createZipArchive(sourceURL: tempDBPath, destinationURL: destinationURL)
         }
         
         func restoreBackup(from sourceURL: URL) throws {
             let fileManager = FileManager.default
-            
-            // Verify the source file exists and is a ZIP
+
             guard fileManager.fileExists(atPath: sourceURL.path) else {
                 throw BackupError.backupFileNotFound
             }
@@ -549,71 +543,54 @@ class DatabaseManager: ObservableObject {
             guard sourceURL.pathExtension.lowercased() == "zip" else {
                 throw BackupError.invalidBackupFile
             }
-            
-            // Create temporary directory for extraction
+
             let tempDir = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
             
             defer {
                 try? fileManager.removeItem(at: tempDir)
             }
-            
-            // Extract ZIP
+
             try extractZipArchive(sourceURL: sourceURL, destinationURL: tempDir)
-            
-            // Verify extracted database
+
             let extractedDBPath = tempDir.appendingPathComponent("booklet.db")
             guard fileManager.fileExists(atPath: extractedDBPath.path) else {
                 throw BackupError.invalidBackupFile
             }
-            
-            // Verify it's a valid SQLite database
+
             guard isValidSQLiteDatabase(at: extractedDBPath) else {
                 throw BackupError.corruptedBackup
             }
-            
-            // Close current database connection
+
             closeDatabase()
-            
-            // Get current database path
+
             let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
             let currentDBPath = documentsPath.appendingPathComponent("booklet.db")
-            
-            // Remove current database
+
             if fileManager.fileExists(atPath: currentDBPath.path) {
                 try fileManager.removeItem(at: currentDBPath)
             }
-            
-            // Copy restored database to documents directory
+
             try fileManager.copyItem(at: extractedDBPath, to: currentDBPath)
-            
-            // Reopen database
+
             openDatabase()
         }
-        
-        // MARK: - Private Helper Methods
-        
+
         private func createZipArchive(sourceURL: URL, destinationURL: URL) throws {
             let fileManager = FileManager.default
-            
-            // Read source file
+
             let sourceData = try Data(contentsOf: sourceURL)
-            
-            // Create ZIP using Compression framework
+
             let compressedData = try compress(data: sourceData)
-            
-            // Write to destination
+
             try compressedData.write(to: destinationURL)
         }
         
         private func extractZipArchive(sourceURL: URL, destinationURL: URL) throws {
-            // Read ZIP file
             let compressedData = try Data(contentsOf: sourceURL)
-            
-            // Decompress
+
             let decompressedData = try decompress(data: compressedData)
-            
-            // Write database file
+
             let dbPath = destinationURL.appendingPathComponent("booklet.db")
             try decompressedData.write(to: dbPath)
         }
@@ -641,7 +618,6 @@ class DatabaseManager: ObservableObject {
         
         private func decompress(data: Data) throws -> Data {
             let sourceBuffer = Array(data)
-            // Allocate buffer size - assume max 10x compression ratio
             let destinationBufferSize = data.count * 10
             var destinationBuffer = [UInt8](repeating: 0, count: destinationBufferSize)
             
@@ -668,8 +644,7 @@ class DatabaseManager: ObservableObject {
                 sqlite3_close(testDB)
                 return false
             }
-            
-            // Try to query sqlite_master table (exists in all SQLite databases)
+
             let query = "SELECT name FROM sqlite_master WHERE type='table' LIMIT 1;"
             var statement: OpaquePointer?
             

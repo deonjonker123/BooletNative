@@ -25,6 +25,7 @@ struct MainView: View {
         case abandonedBooks = "Abandoned Books"
         case statistics = "Statistics"
         case randomBook = "Random Book"
+        case backupRestore = "Backup & Restore"
         
         var icon: String {
             switch self {
@@ -35,6 +36,7 @@ struct MainView: View {
             case .abandonedBooks: return "xmark.circle.fill"
             case .statistics: return "chart.bar.fill"
             case .randomBook: return "dice.fill"
+            case .backupRestore: return "arrow.up.arrow.down.circle.fill"
             }
         }
         
@@ -47,7 +49,12 @@ struct MainView: View {
             case .abandonedBooks: return [Color(hex: "eb3349"), Color(hex: "f45c43")]
             case .statistics: return [Color(hex: "667eea"), Color(hex: "764ba2")]
             case .randomBook: return [Color(hex: "a8edea"), Color(hex: "fed6e3")]
+            case .backupRestore: return [Color(hex: "ffa751"), Color(hex: "ffe259")]
             }
+        }
+        
+        var isUtility: Bool {
+            self == .backupRestore
         }
     }
     
@@ -82,7 +89,7 @@ struct MainView: View {
 
                 ScrollView {
                     VStack(spacing: 6) {
-                        ForEach(NavigationItem.allCases, id: \.self) { item in
+                        ForEach(NavigationItem.allCases.filter { !$0.isUtility }, id: \.self) { item in
                             ModernNavItem(
                                 item: item,
                                 isSelected: selectedView == item,
@@ -96,6 +103,23 @@ struct MainView: View {
                 }
                 
                 Spacer()
+                
+                Divider()
+                    .padding(.vertical, 8)
+                
+                VStack(spacing: 6) {
+                    ForEach(NavigationItem.allCases.filter { $0.isUtility }, id: \.self) { item in
+                        ModernNavItem(
+                            item: item,
+                            isSelected: selectedView == item,
+                            action: {
+                                selectedView = item
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 12)
             }
             .frame(minWidth: 240)
             .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
@@ -117,6 +141,8 @@ struct MainView: View {
                         StatisticsView(navigationPath: $navigationPath)
                     case .randomBook:
                         RandomBookView(navigationPath: $navigationPath)
+                    case .backupRestore:
+                        BackupRestoreView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

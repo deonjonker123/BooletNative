@@ -1,10 +1,3 @@
-//
-//  FilteredCompletedBooksView.swift
-//  Booklet
-//
-//  Filtered view for completed books from Statistics
-//
-
 import SwiftUI
 
 enum CompletedBooksFilterType: Hashable {
@@ -55,7 +48,6 @@ struct FilteredCompletedBooksView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header with Back Button
             HStack {
                 Button(action: { dismiss() }) {
                     HStack(spacing: 6) {
@@ -95,10 +87,8 @@ struct FilteredCompletedBooksView: View {
             .padding(.bottom, 8)
             
             Divider()
-            
-            // Search and Sort Bar
+
             HStack(spacing: 15) {
-                // Search bar
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
@@ -119,8 +109,7 @@ struct FilteredCompletedBooksView: View {
                 .onChange(of: searchText) { _, _ in
                     filterAndSortBooks()
                 }
-                
-                // Sort selector
+
                 HStack(spacing: 8) {
                     Text("Sort:")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -149,8 +138,7 @@ struct FilteredCompletedBooksView: View {
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-            
-            // Table Content
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(paginatedBooks.enumerated()), id: \.element.id) { index, completed in
@@ -169,8 +157,7 @@ struct FilteredCompletedBooksView: View {
             }
             
             Divider()
-            
-            // Pagination Controls
+
             HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -267,10 +254,8 @@ struct FilteredCompletedBooksView: View {
     }
     
     private func loadBooks() {
-        // Get all completed books
         let allCompleted = dbManager.getAllCompletedBooks()
-        
-        // Apply time period filter first
+
         var booksInPeriod: [CompletedBook] = []
         if timePeriod == "All Time" {
             booksInPeriod = allCompleted
@@ -279,12 +264,11 @@ struct FilteredCompletedBooksView: View {
                 Calendar.current.component(.year, from: $0.completionDate) == year
             }
         }
-        
-        // Apply specific filter based on type
+
         switch filterType {
         case .author:
             if filterValue.isEmpty {
-                completedBooks = booksInPeriod    // show all, ignore author
+                completedBooks = booksInPeriod
             } else {
                 completedBooks = booksInPeriod.filter { $0.book?.author == filterValue }
             }
@@ -303,8 +287,7 @@ struct FilteredCompletedBooksView: View {
     
     private func filterAndSortBooks() {
         var filtered = completedBooks
-        
-        // Apply search filter
+
         if !searchText.isEmpty {
             filtered = filtered.filter { completed in
                 guard let book = completed.book else { return false }
@@ -314,8 +297,7 @@ struct FilteredCompletedBooksView: View {
                        (book.genre?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        
-        // Apply sorting
+
         switch sortOption {
         case .author:
             filtered.sort { ($0.book?.author ?? "") < ($1.book?.author ?? "") }
@@ -330,14 +312,4 @@ struct FilteredCompletedBooksView: View {
         filteredBooks = filtered
         currentPage = 0
     }
-}
-
-#Preview {
-    FilteredCompletedBooksView(
-        filterType: .author,
-        filterValue: "Brandon Sanderson",
-        timePeriod: "2024",
-        navigationPath: .constant(NavigationPath())
-    )
-    .environmentObject(DatabaseManager.shared)
 }

@@ -1,10 +1,3 @@
-//
-//  SeriesView.swift
-//  Booklet
-//
-//  Filtered view showing all books in a specific series
-//
-
 import SwiftUI
 
 struct SeriesView: View {
@@ -44,7 +37,6 @@ struct SeriesView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Button(action: { dismiss() }) {
                     HStack(spacing: 6) {
@@ -84,10 +76,8 @@ struct SeriesView: View {
             .padding(.bottom, 8)
             
             Divider()
-            
-            // Search and Sort Bar
+
             HStack(spacing: 15) {
-                // Search bar
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
@@ -108,8 +98,7 @@ struct SeriesView: View {
                 .onChange(of: searchText) { _, _ in
                     filterAndSortBooks()
                 }
-                
-                // Sort selector
+
                 HStack(spacing: 8) {
                     Text("Sort:")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -138,8 +127,7 @@ struct SeriesView: View {
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-            
-            // Table Content
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(paginatedBooks.enumerated()), id: \.element.book.id) { index, item in
@@ -156,8 +144,7 @@ struct SeriesView: View {
             }
             
             Divider()
-            
-            // Pagination Controls
+
             HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -293,8 +280,7 @@ struct SeriesView: View {
     
     private func filterAndSortBooks() {
         var filtered = books
-        
-        // Apply search filter
+
         if !searchText.isEmpty {
             filtered = filtered.filter { item in
                 item.book.title.localizedCaseInsensitiveContains(searchText) ||
@@ -302,8 +288,7 @@ struct SeriesView: View {
                 (item.book.genre?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        
-        // Apply sorting
+
         switch sortOption {
         case .seriesNumber:
             filtered.sort { ($0.book.seriesNumber ?? 0) < ($1.book.seriesNumber ?? 0) }
@@ -319,8 +304,6 @@ struct SeriesView: View {
         currentPage = 0
     }
 }
-
-// MARK: - Series Book Row
 
 struct SeriesBookRow: View {
     let bookWithLocation: BookWithLocation
@@ -342,7 +325,6 @@ struct SeriesBookRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Cover
             Group {
                 if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
                     AsyncImage(url: url) { image in
@@ -361,8 +343,7 @@ struct SeriesBookRow: View {
             .frame(width: 45, height: 68)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-            
-            // Title (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
@@ -373,8 +354,7 @@ struct SeriesBookRow: View {
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
-            
-            // Series Number
+
             if let number = book.seriesNumber {
                 Text("#\(formatSeriesNumber(number))")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -386,8 +366,7 @@ struct SeriesBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 70, alignment: .leading)
             }
-            
-            // Author (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.author(name: book.author))
             }) {
@@ -398,8 +377,7 @@ struct SeriesBookRow: View {
                     .lineLimit(1)
             }
             .buttonStyle(.plain)
-            
-            // Genre (clickable)
+
             if let genre = book.genre {
                 Button(action: {
                     navigationPath.append(NavigationDestination.genre(name: genre))
@@ -417,14 +395,12 @@ struct SeriesBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 120, alignment: .leading)
             }
-            
-            // Page Count
+
             Text("\(book.pageCount)")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 70, alignment: .leading)
-            
-            // Location Badge
+
             Text(location.displayName)
                 .font(.system(size: 11, weight: .semibold, design: .rounded))
                 .padding(.horizontal, 10)
@@ -435,8 +411,7 @@ struct SeriesBookRow: View {
                 .frame(width: 100, alignment: .leading)
             
             Spacer()
-            
-            // Action Buttons
+
             HStack(spacing: 8) {
                 ActionButton(
                     icon: "arrow.up.right.circle.fill",
@@ -502,9 +477,4 @@ struct SeriesBookRow: View {
         }
         return String(number)
     }
-}
-
-#Preview {
-    SeriesView(seriesName: "Harry Potter", navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

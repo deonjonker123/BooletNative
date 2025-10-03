@@ -1,13 +1,5 @@
-//
-//  MainView.swift
-//  Booklet
-//
-//  Main navigation container with modern sidebar
-//
-
 import SwiftUI
 
-// Navigation destination enum
 enum NavigationDestination: Hashable {
     case bookDetail(bookId: Int)
     case author(name: String)
@@ -61,9 +53,7 @@ struct MainView: View {
     
     var body: some View {
         NavigationSplitView {
-            // Modern Sidebar
             VStack(spacing: 0) {
-                // App Title Header
                 VStack(spacing: 8) {
                     HStack(spacing: 12) {
                         Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
@@ -89,8 +79,7 @@ struct MainView: View {
                 
                 Divider()
                     .padding(.vertical, 12)
-                
-                // Navigation Items
+
                 ScrollView {
                     VStack(spacing: 6) {
                         ForEach(NavigationItem.allCases, id: \.self) { item in
@@ -112,7 +101,6 @@ struct MainView: View {
             .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
         } detail: {
             NavigationStack(path: $navigationPath) {
-                // Main content area
                 Group {
                     switch selectedView {
                     case .dashboard:
@@ -165,8 +153,6 @@ struct MainView: View {
     }
 }
 
-// MARK: - Modern Nav Item
-
 struct ModernNavItem: View {
     let item: MainView.NavigationItem
     let isSelected: Bool
@@ -177,7 +163,6 @@ struct ModernNavItem: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                // Icon with gradient background
                 ZStack {
                     if isSelected {
                         Circle()
@@ -208,15 +193,13 @@ struct ModernNavItem: View {
                         )
                         .frame(width: 36, height: 36)
                 }
-                
-                // Label
+
                 Text(item.rawValue)
                     .font(.system(size: 14, weight: isSelected ? .semibold : .medium, design: .rounded))
                     .foregroundColor(isSelected ? .primary : .secondary)
                 
                 Spacer()
-                
-                // Selected indicator
+
                 if isSelected {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(
@@ -261,8 +244,4 @@ struct ModernNavItem: View {
             isHovered = hovering
         }
     }
-}
-
-#Preview {
-    MainView()
 }

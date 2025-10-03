@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  BooletNative
-//
-//  Created by Deon Jonker on 2025/10/02.
-//
-
 import SwiftUI
 
 struct ContentView: View {

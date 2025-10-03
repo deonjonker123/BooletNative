@@ -1,10 +1,3 @@
-//
-//  BookDetailView.swift
-//  Booklet
-//
-//  Individual book detail page with modern design
-//
-
 import SwiftUI
 
 struct BookDetailView: View {
@@ -42,7 +35,6 @@ struct BookDetailView: View {
         ScrollView {
             if let book = book {
                 VStack(alignment: .leading, spacing: 0) {
-                    // Header with Back Button and Actions
                     HStack {
                         Button(action: { dismiss() }) {
                             HStack(spacing: 6) {
@@ -60,8 +52,7 @@ struct BookDetailView: View {
                         .buttonStyle(.plain)
                         
                         Spacer()
-                        
-                        // Action Buttons
+
                         HStack(spacing: 10) {
                             ModernActionButton(
                                 title: "Edit",
@@ -91,10 +82,8 @@ struct BookDetailView: View {
                     .padding(.bottom, 8)
                     
                     Divider()
-                    
-                    // Book Details Section
+
                     HStack(alignment: .top, spacing: 40) {
-                        // Cover
                         VStack {
                             Group {
                                 if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
@@ -127,10 +116,8 @@ struct BookDetailView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
                         }
-                        
-                        // Info
+
                         VStack(alignment: .leading, spacing: 20) {
-                            // Title
                             Text(book.title)
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(
@@ -142,7 +129,6 @@ struct BookDetailView: View {
                                 )
                             
                             VStack(alignment: .leading, spacing: 12) {
-                                // Series
                                 if let seriesDisplay = book.seriesDisplay, let series = book.series {
                                     Button(action: {
                                         navigationPath.append(NavigationDestination.series(name: series))
@@ -161,8 +147,7 @@ struct BookDetailView: View {
                                     }
                                     .buttonStyle(.plain)
                                 }
-                                
-                                // Author
+
                                 Button(action: {
                                     navigationPath.append(NavigationDestination.author(name: book.author))
                                 }) {
@@ -179,8 +164,7 @@ struct BookDetailView: View {
                                     .clipShape(Capsule())
                                 }
                                 .buttonStyle(.plain)
-                                
-                                // Genre
+
                                 if let genre = book.genre {
                                     Button(action: {
                                         navigationPath.append(NavigationDestination.genre(name: genre))
@@ -200,14 +184,12 @@ struct BookDetailView: View {
                                     .buttonStyle(.plain)
                                 }
                             }
-                            
-                            // Metadata
+
                             VStack(alignment: .leading, spacing: 10) {
                                 MetadataRow(icon: "doc.text.fill", text: "\(book.pageCount) pages")
                                 MetadataRow(icon: "calendar.circle.fill", text: "Added \(dateFormatter.string(from: book.dateAdded))")
                             }
-                            
-                            // Location Badge
+
                             HStack(spacing: 10) {
                                 Image(systemName: "mappin.circle.fill")
                                     .font(.system(size: 16))
@@ -224,8 +206,7 @@ struct BookDetailView: View {
                     .padding(30)
                     
                     Divider()
-                    
-                    // Synopsis Section
+
                     if let synopsis = book.synopsis {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Synopsis", systemImage: "text.alignleft")
@@ -241,8 +222,7 @@ struct BookDetailView: View {
                         
                         Divider()
                     }
-                    
-                    // Status-specific Information
+
                     if let completed = completedEntry {
                         CompletedDetailsSection(completed: completed, dateFormatter: dateFormatter)
                             .padding(30)
@@ -334,8 +314,7 @@ struct BookDetailView: View {
     
     private func loadBook() {
         book = dbManager.getBook(id: bookId)
-        
-        // Determine location
+
         let tracked = dbManager.getAllTrackedBooks()
         let completed = dbManager.getAllCompletedBooks()
         let abandoned = dbManager.getAllAbandonedBooks()
@@ -355,8 +334,6 @@ struct BookDetailView: View {
     }
 }
 
-// MARK: - Metadata Row
-
 struct MetadataRow: View {
     let icon: String
     let text: String
@@ -373,8 +350,6 @@ struct MetadataRow: View {
         }
     }
 }
-
-// MARK: - Modern Action Button
 
 struct ModernActionButton: View {
     let title: String
@@ -412,8 +387,6 @@ struct ModernActionButton: View {
         }
     }
 }
-
-// MARK: - Completed Details Section
 
 struct CompletedDetailsSection: View {
     let completed: CompletedBook
@@ -469,8 +442,6 @@ struct CompletedDetailsSection: View {
     }
 }
 
-// MARK: - Abandoned Details Section
-
 struct AbandonedDetailsSection: View {
     let abandoned: AbandonedBook
     let book: Book
@@ -517,8 +488,6 @@ struct AbandonedDetailsSection: View {
     }
 }
 
-// MARK: - Tracking Details Section
-
 struct TrackingDetailsSection: View {
     let tracker: ReadingTrackerEntry
     let book: Book
@@ -534,8 +503,7 @@ struct TrackingDetailsSection: View {
                 MetadataRow(icon: "book.pages.fill", text: "Current page: \(tracker.currentPage) / \(book.pageCount)")
                 MetadataRow(icon: "chart.pie.fill", text: "Progress: \(Int(tracker.progressPercentage))%")
                 MetadataRow(icon: "play.circle.fill", text: "Started: \(dateFormatter.string(from: tracker.startDate))")
-                
-                // Progress Bar
+
                 VStack(alignment: .leading, spacing: 8) {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
@@ -560,9 +528,4 @@ struct TrackingDetailsSection: View {
             }
         }
     }
-}
-
-#Preview {
-    BookDetailView(bookId: 1, navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

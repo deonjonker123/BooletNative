@@ -1,10 +1,3 @@
-//
-//  DatabaseManager.swift
-//  Booklet
-//
-//  Manages all SQLite database operations
-//
-
 import Foundation
 import SQLite3
 import Combine
@@ -27,20 +20,16 @@ class DatabaseManager: ObservableObject {
         closeDatabase()
     }
     
-    // MARK: - Database Connection
-    
     private func openDatabase() {
         guard let dbPath = Bundle.main.path(forResource: "booklet", ofType: "db") else {
             print("ERROR: Database file not found in bundle")
             return
         }
-        
-        // Copy database to Documents directory for read/write access
+
         let fileManager = FileManager.default
         let documentsPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let destinationPath = documentsPath.appendingPathComponent("booklet.db")
-        
-        // Copy if doesn't exist
+
         if !fileManager.fileExists(atPath: destinationPath.path) {
             do {
                 try fileManager.copyItem(atPath: dbPath, toPath: destinationPath.path)
@@ -50,8 +39,7 @@ class DatabaseManager: ObservableObject {
                 return
             }
         }
-        
-        // Open database
+
         if sqlite3_open(destinationPath.path, &db) != SQLITE_OK {
             print("ERROR: Could not open database")
             return
@@ -66,8 +54,6 @@ class DatabaseManager: ObservableObject {
             db = nil
         }
     }
-    
-    // MARK: - Books (Library)
     
     func getAllBooks() -> [Book] {
         var books: [Book] = []
@@ -200,8 +186,6 @@ class DatabaseManager: ObservableObject {
         return false
     }
     
-    // MARK: - Reading Tracker
-    
     func getAllTrackedBooks() -> [ReadingTrackerEntry] {
         var entries: [ReadingTrackerEntry] = []
         let query = """
@@ -223,7 +207,6 @@ class DatabaseManager: ObservableObject {
                     startDate: parseDate(statement: statement, index: 3) ?? Date()
                 )
                 
-                // Parse associated book (columns 4-13)
                 entry.book = parseBookRowWithOffset(statement: statement, offset: 4)
                 entries.append(entry)
             }
@@ -286,7 +269,6 @@ class DatabaseManager: ObservableObject {
     }
     
     func completeBook(trackerId: Int, bookId: Int, rating: Int?, review: String?, startDate: Date?) -> Bool {
-        // Insert into completed_books
         let insertQuery = """
             INSERT INTO completed_books (book_id, rating, review, start_date)
             VALUES (?, ?, ?, ?)
@@ -313,7 +295,6 @@ class DatabaseManager: ObservableObject {
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 sqlite3_finalize(statement)
-                // Remove from tracker
                 return removeFromReadingTracker(id: trackerId)
             }
         }
@@ -323,7 +304,6 @@ class DatabaseManager: ObservableObject {
     }
     
     func abandonBook(trackerId: Int, bookId: Int, pageAtAbandonment: Int?, reason: String?, startDate: Date?) -> Bool {
-        // Insert into abandoned_books
         let insertQuery = """
             INSERT INTO abandoned_books (book_id, page_at_abandonment, reason, start_date)
             VALUES (?, ?, ?, ?)
@@ -350,7 +330,6 @@ class DatabaseManager: ObservableObject {
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 sqlite3_finalize(statement)
-                // Remove from tracker
                 return removeFromReadingTracker(id: trackerId)
             }
         }
@@ -358,8 +337,6 @@ class DatabaseManager: ObservableObject {
         sqlite3_finalize(statement)
         return false
     }
-    
-    // MARK: - Completed Books
     
     func getAllCompletedBooks() -> [CompletedBook] {
         var completed: [CompletedBook] = []
@@ -383,8 +360,7 @@ class DatabaseManager: ObservableObject {
                     startDate: parseDate(statement: statement, index: 4),
                     completionDate: parseDate(statement: statement, index: 5) ?? Date()
                 )
-                
-                // Parse associated book (columns 6-15)
+
                 entry.book = parseBookRowWithOffset(statement: statement, offset: 6)
                 completed.append(entry)
             }
@@ -448,8 +424,6 @@ class DatabaseManager: ObservableObject {
         return false
     }
     
-    // MARK: - Abandoned Books
-    
     func getAllAbandonedBooks() -> [AbandonedBook] {
         var abandoned: [AbandonedBook] = []
         let query = """
@@ -472,8 +446,7 @@ class DatabaseManager: ObservableObject {
                     startDate: parseDate(statement: statement, index: 4),
                     abandonmentDate: parseDate(statement: statement, index: 5) ?? Date()
                 )
-                
-                // Parse associated book (columns 6-15)
+
                 entry.book = parseBookRowWithOffset(statement: statement, offset: 6)
                 abandoned.append(entry)
             }
@@ -536,8 +509,6 @@ class DatabaseManager: ObservableObject {
         sqlite3_finalize(statement)
         return false
     }
-    
-    // MARK: - Helper Functions
     
     private func parseBookRow(statement: OpaquePointer?) -> Book? {
         return parseBookRowWithOffset(statement: statement, offset: 0)

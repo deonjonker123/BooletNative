@@ -1,10 +1,3 @@
-//
-//  Book.swift
-//  Booklet
-//
-//  Model representing a book in the library
-//
-
 import Foundation
 
 struct Book: Identifiable, Codable {
@@ -18,8 +11,7 @@ struct Book: Identifiable, Codable {
     var synopsis: String?
     var genre: String?
     var dateAdded: Date
-    
-    // Computed property for display
+
     var seriesDisplay: String? {
         guard let series = series else { return nil }
         if let number = seriesNumber {
@@ -27,8 +19,7 @@ struct Book: Identifiable, Codable {
         }
         return series
     }
-    
-    // Format series number (remove .0 for whole numbers)
+
     private func formatSeriesNumber(_ number: Double) -> String {
         if number.truncatingRemainder(dividingBy: 1) == 0 {
             return String(Int(number))
@@ -36,7 +27,6 @@ struct Book: Identifiable, Codable {
         return String(number)
     }
     
-    // Database column mapping
     enum CodingKeys: String, CodingKey {
         case id
         case coverUrl = "cover_url"

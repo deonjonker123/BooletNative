@@ -1,10 +1,3 @@
-//
-//  DashboardView.swift
-//  Booklet
-//
-//  Modern, compact dashboard with enhanced visuals
-//
-
 import SwiftUI
 
 struct DashboardView: View {
@@ -14,14 +7,12 @@ struct DashboardView: View {
     @State private var completedCount: Int = 0
     @State private var abandonedCount: Int = 0
     @State private var currentlyReading: [ReadingTrackerEntry] = []
-    
-    // For animation
+
     @State private var isLoaded: Bool = false
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                // Header with gradient text
                 Text("Dashboard")
                     .font(.system(size: 38, weight: .bold, design: .rounded))
                     .foregroundStyle(
@@ -39,7 +30,6 @@ struct DashboardView: View {
                     .padding(.bottom, 32)
                 
                 VStack(alignment: .leading, spacing: 40) {
-                    // Stats Grid - Clickable Cards
                     HStack(spacing: 20) {
                     ModernStatCard(
                         title: "In Library",
@@ -81,8 +71,7 @@ struct DashboardView: View {
                     }
                 }
                 .padding(.horizontal, 32)
-                
-                // Currently Reading Section
+
                 if !currentlyReading.isEmpty {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -121,7 +110,6 @@ struct DashboardView: View {
                         }
                     }
                 } else {
-                    // Empty state
                     VStack(spacing: 16) {
                         Image(systemName: "book.closed")
                             .font(.system(size: 48))
@@ -169,15 +157,12 @@ struct DashboardView: View {
     }
     
     private func loadData() {
-        // Get all books
         let allBooks = dbManager.getAllBooks()
-        
-        // Get books that are in other locations
+
         let trackedBookIds = Set(dbManager.getAllTrackedBooks().map { $0.bookId })
         let completedBookIds = Set(dbManager.getAllCompletedBooks().map { $0.bookId })
         let abandonedBookIds = Set(dbManager.getAllAbandonedBooks().map { $0.bookId })
-        
-        // FIXED: Only count books that are NOT in tracker, completed, or abandoned
+
         libraryCount = allBooks.filter { book in
             !trackedBookIds.contains(book.id) &&
             !completedBookIds.contains(book.id) &&
@@ -189,8 +174,6 @@ struct DashboardView: View {
         currentlyReading = dbManager.getAllTrackedBooks()
     }
 }
-
-// MARK: - Modern Stat Card
 
 struct ModernStatCard: View {
     let title: String
@@ -278,8 +261,6 @@ struct ModernStatCard: View {
     }
 }
 
-// MARK: - Modern Reading Card
-
 struct ModernReadingCard: View {
     let entry: ReadingTrackerEntry
     let book: Book
@@ -290,7 +271,6 @@ struct ModernReadingCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Cover with shadow
             Group {
                 if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
                     AsyncImage(url: url) { image in
@@ -333,8 +313,7 @@ struct ModernReadingCard: View {
                     .font(.system(size: 13, weight: .medium, design: .rounded))
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                
-                // Compact progress
+
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
                         Text("\(Int(entry.progressPercentage))%")
@@ -351,8 +330,7 @@ struct ModernReadingCard: View {
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundColor(.secondary)
                     }
-                    
-                    // Progress bar
+
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             Capsule()
@@ -400,8 +378,6 @@ struct ModernReadingCard: View {
     }
 }
 
-// MARK: - Old StatCard (for Statistics view compatibility)
-
 struct StatCard: View {
     let title: String
     let value: String
@@ -423,8 +399,6 @@ struct StatCard: View {
     }
 }
 
-// MARK: - Color Extension
-
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -432,11 +406,11 @@ extension Color {
         Scanner(string: hex).scanHexInt64(&int)
         let a, r, g, b: UInt64
         switch hex.count {
-        case 3: // RGB (12-bit)
+        case 3:
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
+        case 6:
             (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
+        case 8:
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
             (a, r, g, b) = (1, 1, 1, 0)
@@ -450,9 +424,4 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
-}
-
-#Preview {
-    DashboardView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

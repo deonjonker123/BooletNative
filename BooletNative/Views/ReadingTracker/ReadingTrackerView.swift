@@ -1,10 +1,3 @@
-//
-//  ReadingTrackerView.swift
-//  Booklet
-//
-//  Reading tracker with modern design and progress tracking
-//
-
 import SwiftUI
 
 struct ReadingTrackerView: View {
@@ -17,7 +10,6 @@ struct ReadingTrackerView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header
             HStack {
                 Text("Reading Tracker")
                     .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -47,7 +39,6 @@ struct ReadingTrackerView: View {
             Divider()
             
             if trackedBooks.isEmpty {
-                // Empty State
                 VStack(spacing: 20) {
                     Image(systemName: "book.closed")
                         .font(.system(size: 64))
@@ -164,8 +155,6 @@ struct ReadingTrackerView: View {
     }
 }
 
-// MARK: - Modern Tracked Book Card
-
 struct ModernTrackedBookCard: View {
     let entry: ReadingTrackerEntry
     let book: Book
@@ -191,7 +180,6 @@ struct ModernTrackedBookCard: View {
     
     var body: some View {
         HStack(spacing: 24) {
-            // Cover
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
@@ -215,10 +203,8 @@ struct ModernTrackedBookCard: View {
                 .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
             }
             .buttonStyle(.plain)
-            
-            // Content
+
             VStack(alignment: .leading, spacing: 16) {
-                // Title & Metadata
                 VStack(alignment: .leading, spacing: 8) {
                     Button(action: {
                         navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
@@ -231,7 +217,6 @@ struct ModernTrackedBookCard: View {
                     .buttonStyle(.plain)
                     
                     HStack(spacing: 10) {
-                        // Series
                         if let seriesDisplay = book.seriesDisplay, let series = book.series {
                             Button(action: {
                                 navigationPath.append(NavigationDestination.series(name: series))
@@ -250,8 +235,7 @@ struct ModernTrackedBookCard: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        
-                        // Author
+
                         Button(action: {
                             navigationPath.append(NavigationDestination.author(name: book.author))
                         }) {
@@ -268,8 +252,7 @@ struct ModernTrackedBookCard: View {
                             .clipShape(Capsule())
                         }
                         .buttonStyle(.plain)
-                        
-                        // Genre
+
                         if let genre = book.genre {
                             Button(action: {
                                 navigationPath.append(NavigationDestination.genre(name: genre))
@@ -290,8 +273,7 @@ struct ModernTrackedBookCard: View {
                         }
                     }
                 }
-                
-                // Progress Section
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Text("Progress")
@@ -310,8 +292,7 @@ struct ModernTrackedBookCard: View {
                                 )
                             )
                     }
-                    
-                    // Progress Bar
+
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             Capsule()
@@ -330,8 +311,7 @@ struct ModernTrackedBookCard: View {
                         }
                     }
                     .frame(height: 10)
-                    
-                    // Page Input
+
                     HStack(spacing: 12) {
                         HStack(spacing: 8) {
                             TextField("Page", text: $currentPageText)
@@ -372,8 +352,7 @@ struct ModernTrackedBookCard: View {
             }
             
             Spacer()
-            
-            // Action Buttons
+
             VStack(spacing: 10) {
                 TrackerActionButton(
                     title: "Complete",
@@ -422,8 +401,6 @@ struct ModernTrackedBookCard: View {
     }
 }
 
-// MARK: - Tracker Action Button
-
 struct TrackerActionButton: View {
     let title: String
     let icon: String
@@ -461,8 +438,6 @@ struct TrackerActionButton: View {
     }
 }
 
-// MARK: - Complete Book Modal
-
 struct CompleteBookModal: View {
     @Binding var isPresented: Bool
     let entry: ReadingTrackerEntry
@@ -475,7 +450,6 @@ struct CompleteBookModal: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Complete Book")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -508,8 +482,7 @@ struct CompleteBookModal: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Divider()
-                
-                // Rating
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Rating", systemImage: "star.fill")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -526,8 +499,7 @@ struct CompleteBookModal: View {
                         }
                     }
                 }
-                
-                // Review
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Review (Optional)", systemImage: "text.alignleft")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -549,8 +521,7 @@ struct CompleteBookModal: View {
             .padding(.vertical, 24)
             
             Divider()
-            
-            // Action Buttons
+
             HStack(spacing: 12) {
                 Button(action: { isPresented = false }) {
                     Text("Cancel")
@@ -607,8 +578,6 @@ struct CompleteBookModal: View {
     }
 }
 
-// MARK: - Abandon Book Modal
-
 struct AbandonBookModal: View {
     @Binding var isPresented: Bool
     let entry: ReadingTrackerEntry
@@ -620,7 +589,6 @@ struct AbandonBookModal: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Abandon Book")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -657,8 +625,7 @@ struct AbandonBookModal: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Divider()
-                
-                // Reason
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Reason (Optional)", systemImage: "text.alignleft")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -680,8 +647,7 @@ struct AbandonBookModal: View {
             .padding(.vertical, 24)
             
             Divider()
-            
-            // Action Buttons
+
             HStack(spacing: 12) {
                 Button(action: { isPresented = false }) {
                     Text("Cancel")
@@ -736,9 +702,4 @@ struct AbandonBookModal: View {
             onSave()
         }
     }
-}
-
-#Preview {
-    ReadingTrackerView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

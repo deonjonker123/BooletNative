@@ -31,8 +31,7 @@ struct EditBookModal: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            
-            // Cover Preview
+
             VStack(spacing: 12) {
                 Text("Cover Preview")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -67,8 +66,7 @@ struct EditBookModal: View {
             
             Divider()
                 .padding(.vertical, 16)
-            
-            // Form
+
             ScrollView {
                 VStack(spacing: 18) {
                     ModernTextField(placeholder: "https://...", text: $coverUrl)
@@ -108,8 +106,7 @@ struct EditBookModal: View {
                 .padding(.horizontal, 28)
                 .padding(.bottom, 24)
             }
-            
-            // Divider + Action Buttons
+
             Divider()
             
             HStack(spacing: 12) {

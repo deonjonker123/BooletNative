@@ -1,10 +1,3 @@
-//
-//  BookTable.swift
-//  Booklet
-//
-//  Reusable book table component with pagination and actions
-//
-
 import SwiftUI
 
 struct BookTable<Item: Identifiable>: View {
@@ -39,7 +32,6 @@ struct BookTable<Item: Identifiable>: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Table Header
             HStack(spacing: 10) {
                 ForEach(columns.indices, id: \.self) { index in
                     Text(columns[index].title)
@@ -53,8 +45,7 @@ struct BookTable<Item: Identifiable>: View {
             .background(Color(nsColor: .controlBackgroundColor))
             
             Divider()
-            
-            // Table Content
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(paginatedItems) { item in
@@ -69,8 +60,7 @@ struct BookTable<Item: Identifiable>: View {
             }
             
             Divider()
-            
-            // Pagination Controls
+
             HStack {
                 Text("\(items.count) items")
                     .font(.system(size: 13))
@@ -143,23 +133,6 @@ struct TableRow<Item: Identifiable>: View {
     }
 }
 
-// Dummy type for preview and type constraints
 struct DummyIdentifiable: Identifiable {
     let id: Int
-}
-
-#Preview {
-    BookTable(
-        items: [DummyIdentifiable(id: 1), DummyIdentifiable(id: 2)],
-        columns: [
-            BookTable.TableColumn(title: "Title", width: 200),
-            BookTable.TableColumn(title: "Author", width: 150)
-        ],
-        rowContent: { _ in ["Sample Title", "Sample Author"] },
-        actions: { _ in [
-            BookTable.TableAction(title: "Open", color: .blue, action: {})
-        ] },
-        currentPage: .constant(0),
-        rowsPerPage: .constant(50)
-    )
 }

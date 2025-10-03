@@ -1,10 +1,3 @@
-//
-//  AbandonedBooksView.swift
-//  Booklet
-//
-//  View for abandoned books with modern design
-//
-
 import SwiftUI
 
 struct AbandonedBooksView: View {
@@ -39,7 +32,6 @@ struct AbandonedBooksView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Abandoned Books")
                     .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -57,10 +49,8 @@ struct AbandonedBooksView: View {
             .padding(.bottom, 8)
             
             Divider()
-            
-            // Search and Sort Bar
+
             HStack(spacing: 15) {
-                // Search bar
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
@@ -81,8 +71,7 @@ struct AbandonedBooksView: View {
                 .onChange(of: searchText) { _, _ in
                     filterAndSortBooks()
                 }
-                
-                // Sort selector
+
                 HStack(spacing: 8) {
                     Text("Sort:")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -111,8 +100,7 @@ struct AbandonedBooksView: View {
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-            
-            // Table Content
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(paginatedBooks.enumerated()), id: \.element.id) { index, abandoned in
@@ -131,8 +119,7 @@ struct AbandonedBooksView: View {
             }
             
             Divider()
-            
-            // Pagination Controls
+
             HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -235,8 +222,7 @@ struct AbandonedBooksView: View {
     
     private func filterAndSortBooks() {
         var filtered = abandonedBooks
-        
-        // Apply search filter
+
         if !searchText.isEmpty {
             filtered = filtered.filter { abandoned in
                 guard let book = abandoned.book else { return false }
@@ -246,8 +232,7 @@ struct AbandonedBooksView: View {
                        (book.genre?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        
-        // Apply sorting
+
         switch sortOption {
         case .author:
             filtered.sort { ($0.book?.author ?? "") < ($1.book?.author ?? "") }
@@ -263,8 +248,6 @@ struct AbandonedBooksView: View {
         currentPage = 0
     }
 }
-
-// MARK: - Abandoned Book Row
 
 struct AbandonedBookRow: View {
     let abandoned: AbandonedBook
@@ -285,7 +268,6 @@ struct AbandonedBookRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Cover
             Group {
                 if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
                     AsyncImage(url: url) { image in
@@ -304,8 +286,7 @@ struct AbandonedBookRow: View {
             .frame(width: 45, height: 68)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-            
-            // Title (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
@@ -316,8 +297,7 @@ struct AbandonedBookRow: View {
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
-            
-            // Series (clickable)
+
             if let series = book.series {
                 Button(action: {
                     navigationPath.append(NavigationDestination.series(name: series))
@@ -335,8 +315,7 @@ struct AbandonedBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 120, alignment: .leading)
             }
-            
-            // Author (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.author(name: book.author))
             }) {
@@ -347,8 +326,7 @@ struct AbandonedBookRow: View {
                     .lineLimit(1)
             }
             .buttonStyle(.plain)
-            
-            // Genre (clickable)
+
             if let genre = book.genre {
                 Button(action: {
                     navigationPath.append(NavigationDestination.genre(name: genre))
@@ -366,14 +344,12 @@ struct AbandonedBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 100, alignment: .leading)
             }
-            
-            // Page Count
+
             Text("\(book.pageCount)")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 60, alignment: .leading)
-            
-            // Page at Abandonment
+
             if let page = abandoned.pageAtAbandonment {
                 Text("\(page)")
                     .font(.system(size: 13, design: .rounded))
@@ -385,16 +361,14 @@ struct AbandonedBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 80, alignment: .leading)
             }
-            
-            // Abandonment Date
+
             Text(dateFormatter.string(from: abandoned.abandonmentDate))
                 .font(.system(size: 13, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 100, alignment: .leading)
             
             Spacer()
-            
-            // Action Buttons
+
             HStack(spacing: 8) {
                 ActionButton(
                     icon: "arrow.up.right.circle.fill",
@@ -446,8 +420,6 @@ struct AbandonedBookRow: View {
     }
 }
 
-// MARK: - Edit Abandoned Book Modal
-
 struct EditAbandonedBookModal: View {
     let abandoned: AbandonedBook
     let onSave: () -> Void
@@ -471,7 +443,6 @@ struct EditAbandonedBookModal: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Edit Abandoned Book")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -506,8 +477,7 @@ struct EditAbandonedBookModal: View {
                 }
                 
                 Divider()
-                
-                // Page at Abandonment
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Page at Abandonment", systemImage: "book.pages")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -525,8 +495,7 @@ struct EditAbandonedBookModal: View {
                                 .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                         )
                 }
-                
-                // Reason
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Reason", systemImage: "text.alignleft")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -543,8 +512,7 @@ struct EditAbandonedBookModal: View {
                                 .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                         )
                 }
-                
-                // Dates
+
                 VStack(alignment: .leading, spacing: 16) {
                     DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                         .font(.system(size: 14, design: .rounded))
@@ -557,8 +525,7 @@ struct EditAbandonedBookModal: View {
             .padding(.vertical, 24)
             
             Divider()
-            
-            // Action Buttons
+
             HStack(spacing: 12) {
                 Button(action: onCancel) {
                     Text("Cancel")
@@ -611,9 +578,4 @@ struct EditAbandonedBookModal: View {
         )
         onSave()
     }
-}
-
-#Preview {
-    AbandonedBooksView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

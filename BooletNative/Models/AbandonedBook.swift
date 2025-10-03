@@ -1,10 +1,3 @@
-//
-//  AbandonedBook.swift
-//  Booklet
-//
-//  Model representing an abandoned book
-//
-
 import Foundation
 
 struct AbandonedBook: Identifiable, Codable {
@@ -14,19 +7,16 @@ struct AbandonedBook: Identifiable, Codable {
     var reason: String?
     var startDate: Date?
     var abandonmentDate: Date
-    
-    // Associated book data (joined from books table)
+
     var book: Book?
-    
-    // Progress percentage at abandonment
+
     var progressPercentage: Double? {
         guard let book = book,
               let pageAtAbandonment = pageAtAbandonment,
               book.pageCount > 0 else { return nil }
         return (Double(pageAtAbandonment) / Double(book.pageCount)) * 100.0
     }
-    
-    // Database column mapping
+
     enum CodingKeys: String, CodingKey {
         case id
         case bookId = "book_id"

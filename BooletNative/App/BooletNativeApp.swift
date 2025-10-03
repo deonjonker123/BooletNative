@@ -1,10 +1,3 @@
-//
-//  BookletApp.swift
-//  Booklet
-//
-//  App entry point
-//
-
 import SwiftUI
 
 @main

@@ -1,10 +1,3 @@
-//
-//  RandomBookView.swift
-//  Booklet
-//
-//  Smart random book selector with modern design
-//
-
 import SwiftUI
 
 struct RandomBookView: View {
@@ -29,7 +22,6 @@ struct RandomBookView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 32) {
-                // Header
                 VStack(spacing: 12) {
                     Text("Random Book Selector")
                         .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -49,8 +41,7 @@ struct RandomBookView: View {
                 
                 Divider()
                     .padding(.horizontal, 32)
-                
-                // Filters Section
+
                 VStack(alignment: .leading, spacing: 20) {
                     HStack {
                         Image(systemName: "slider.horizontal.3")
@@ -119,8 +110,7 @@ struct RandomBookView: View {
                         .fill(Color(nsColor: .controlBackgroundColor))
                 )
                 .padding(.horizontal, 32)
-                
-                // Roll Button
+
                 Button(action: {
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
                         isRolling = true
@@ -156,8 +146,7 @@ struct RandomBookView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isRolling)
-                
-                // Selected Book Display
+
                 if let book = selectedBook {
                     VStack(spacing: 24) {
                         Divider()
@@ -216,23 +205,19 @@ struct RandomBookView: View {
         let completedBooks = dbManager.getAllCompletedBooks()
         let trackedBooks = dbManager.getAllTrackedBooks()
         let abandonedBooks = dbManager.getAllAbandonedBooks()
-        
-        // Get IDs of non-library books
+
         let completedIds = Set(completedBooks.map { $0.bookId })
         let trackedIds = Set(trackedBooks.map { $0.bookId })
         let abandonedIds = Set(abandonedBooks.map { $0.bookId })
-        
-        // Only allow books that are in the library (not completed/tracked/abandoned)
+
         let libraryBooks = allBooks.filter { book in
             !completedIds.contains(book.id) &&
             !trackedIds.contains(book.id) &&
             !abandonedIds.contains(book.id)
         }
-        
-        // Get last completed book for rules
+
         let lastCompleted = completedBooks.first
-        
-        // Apply filters
+
         var eligibleBooks = libraryBooks.filter { book in
             if !filterAuthor.isEmpty && !book.author.localizedCaseInsensitiveContains(filterAuthor) {
                 return false
@@ -249,8 +234,7 @@ struct RandomBookView: View {
             if let maxPages = Int(filterPageCountMax), book.pageCount > maxPages {
                 return false
             }
-            
-            // Smart rules based on last completed book
+
             if let last = lastCompleted, let lastBook = last.book {
                 if book.genre == lastBook.genre && book.genre != nil {
                     return false
@@ -265,8 +249,7 @@ struct RandomBookView: View {
                     return false
                 }
             }
-            
-            // Series progression rule
+
             if let series = book.series, let seriesNumber = book.seriesNumber, seriesNumber > 1 {
                 let previousNumber = seriesNumber - 1
                 let previousCompleted = completedBooks.contains { completed in
@@ -280,8 +263,7 @@ struct RandomBookView: View {
             
             return true
         }
-        
-        // Select random book
+
         if let randomBook = eligibleBooks.randomElement() {
             selectedBook = randomBook
             bookLocation = .library
@@ -290,8 +272,6 @@ struct RandomBookView: View {
         }
     }
 }
-
-// MARK: - Filter Field
 
 struct FilterField: View {
     let label: String
@@ -325,8 +305,6 @@ struct FilterField: View {
     }
 }
 
-// MARK: - Selected Book Card
-
 struct SelectedBookCard: View {
     let book: Book
     let location: RandomBookView.BookLocation
@@ -346,7 +324,6 @@ struct SelectedBookCard: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 32) {
-            // Cover
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
@@ -382,10 +359,8 @@ struct SelectedBookCard: View {
                 .shadow(color: Color.black.opacity(0.25), radius: 20, x: 0, y: 10)
             }
             .buttonStyle(.plain)
-            
-            // Details
+
             VStack(alignment: .leading, spacing: 20) {
-                // Title
                 Button(action: {
                     navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
                 }) {
@@ -402,8 +377,7 @@ struct SelectedBookCard: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.plain)
-                
-                // Badges
+
                 HStack(spacing: 10) {
                     if let seriesDisplay = book.seriesDisplay, let series = book.series {
                         Button(action: {
@@ -460,8 +434,7 @@ struct SelectedBookCard: View {
                         .buttonStyle(.plain)
                     }
                 }
-                
-                // Metadata
+
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 8) {
                         Image(systemName: "doc.text.fill")
@@ -481,8 +454,7 @@ struct SelectedBookCard: View {
                             .foregroundColor(locationColor)
                     }
                 }
-                
-                // Synopsis
+
                 if let synopsis = book.synopsis {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Synopsis")
@@ -495,8 +467,7 @@ struct SelectedBookCard: View {
                             .lineLimit(6)
                     }
                 }
-                
-                // Action Buttons
+
                 HStack(spacing: 12) {
                     Button(action: {
                         navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
@@ -565,9 +536,4 @@ struct SelectedBookCard: View {
             isHovered = hovering
         }
     }
-}
-
-#Preview {
-    RandomBookView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

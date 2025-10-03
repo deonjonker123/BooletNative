@@ -1,10 +1,3 @@
-//
-//  StatisticsView.swift
-//  Booklet
-//
-//  Statistics page with modern charts and reading metrics
-//
-
 import SwiftUI
 import Charts
 
@@ -49,7 +42,6 @@ struct StatisticsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
-                // Header with Year Filter
                 HStack {
                     Text("Statistics")
                         .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -94,8 +86,7 @@ struct StatisticsView: View {
                 
                 Divider()
                     .padding(.horizontal, 32)
-                
-                // Reading Streak
+
                 HStack {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 10) {
@@ -140,8 +131,7 @@ struct StatisticsView: View {
                         .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
                 )
                 .padding(.horizontal, 32)
-                
-                // Stats Grid
+
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),
@@ -209,13 +199,10 @@ struct StatisticsView: View {
                     }
                 }
                 .padding(.horizontal, 32)
-                
-                // Charts Section
+
                 VStack(spacing: 24) {
-                    // Reading Activity - CLICKABLE TWO BAR CHARTS (Year Filter)
                     if !filteredBooks.isEmpty {
                         VStack(spacing: 32) {
-                            // Pages Read per Month
                             ChartCard(title: "Pages Read", icon: "book.fill") {
                                 Chart {
                                     ForEach(monthlyStats, id: \.month) { stat in
@@ -241,12 +228,11 @@ struct StatisticsView: View {
                                     AxisMarks(values: monthlyStats.map { $0.monthName })
                                 }
                                 .chartOverlay { _ in
-                                    // Entire chart is tappable
                                     Rectangle().fill(.clear).contentShape(Rectangle())
                                         .onTapGesture {
                                             navigationPath.append(
                                                 NavigationDestination.filteredCompleted(
-                                                    filterType: .author, // no filter, just all books
+                                                    filterType: .author,
                                                     filterValue: "",
                                                     timePeriod: selectedYear
                                                 )
@@ -255,7 +241,6 @@ struct StatisticsView: View {
                                 }
                             }
 
-                            // Books Completed per Month
                             ChartCard(title: "Books Completed", icon: "checkmark.seal.fill") {
                                 Chart {
                                     ForEach(monthlyStats, id: \.month) { stat in
@@ -296,8 +281,6 @@ struct StatisticsView: View {
                         }
                     }
 
-                    
-                    // Top Authors - CLICKABLE NORMAL BAR CHART
                     if !topAuthors.isEmpty {
                         ChartCard(title: "Top 10 Authors", icon: "person.3.fill") {
                             Chart {
@@ -327,7 +310,6 @@ struct StatisticsView: View {
                                 GeometryReader { geo in
                                     Rectangle().fill(.clear).contentShape(Rectangle())
                                         .onTapGesture { location in
-                                            // map tap location to Y-axis (Author)
                                             if let author = proxy.value(atY: location.y, as: String.self) {
                                                 navigationPath.append(
                                                     NavigationDestination.filteredCompleted(
@@ -343,8 +325,6 @@ struct StatisticsView: View {
                         }
                     }
 
-                    
-                    // Top Genres - CLICKABLE NORMAL BAR CHART
                     if !topGenres.isEmpty {
                         ChartCard(title: "Top 10 Genres", icon: "tag.fill") {
                             Chart {
@@ -374,7 +354,6 @@ struct StatisticsView: View {
                                 GeometryReader { geo in
                                     Rectangle().fill(.clear).contentShape(Rectangle())
                                         .onTapGesture { location in
-                                            // map tap location to Y-axis (Genre)
                                             if let genre = proxy.value(atY: location.y, as: String.self) {
                                                 navigationPath.append(
                                                     NavigationDestination.filteredCompleted(
@@ -390,8 +369,6 @@ struct StatisticsView: View {
                         }
                     }
 
-                    
-                    // Rating Distribution - CLICKABLE
                     if !ratingSplit.isEmpty {
                         ChartCard(title: "Rating Distribution", icon: "star.fill") {
                             Chart {
@@ -452,9 +429,7 @@ struct StatisticsView: View {
             loadData()
         }
     }
-    
-    // MARK: - Data Loading
-    
+
     private func loadData() {
         completedBooks = dbManager.getAllCompletedBooks()
         filterBooks()
@@ -496,9 +471,7 @@ struct StatisticsView: View {
         
         readingStreak = streak
     }
-    
-    // MARK: - Computed Stats
-    
+
     private var monthlyStats: [MonthlyStats] {
         let calendar = Calendar.current
         var monthData: [Int: (books: Int, pages: Int)] = [:]
@@ -576,8 +549,6 @@ struct StatisticsView: View {
     }
 }
 
-// MARK: - Stats Stat Card
-
 struct StatsStatCard: View {
     let title: String
     let value: String
@@ -639,8 +610,6 @@ struct StatsStatCard: View {
     }
 }
 
-// MARK: - Chart Card
-
 struct ChartCard<Content: View>: View {
     let title: String
     let icon: String
@@ -675,8 +644,6 @@ struct ChartCard<Content: View>: View {
     }
 }
 
-// MARK: - Supporting Types
-
 struct MonthlyStats {
     let month: Int
     let monthName: String
@@ -697,9 +664,4 @@ struct GenreStats {
 struct RatingStats {
     let rating: Int
     let count: Int
-}
-
-#Preview {
-    StatisticsView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

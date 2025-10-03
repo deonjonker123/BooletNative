@@ -1,10 +1,3 @@
-//
-//  CompletedBooksView.swift
-//  Booklet
-//
-//  View for completed books with modern design
-//
-
 import SwiftUI
 
 struct CompletedBooksView: View {
@@ -39,7 +32,6 @@ struct CompletedBooksView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Completed Books")
                     .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -57,10 +49,8 @@ struct CompletedBooksView: View {
             .padding(.bottom, 8)
             
             Divider()
-            
-            // Search and Sort Bar
+
             HStack(spacing: 15) {
-                // Search bar
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
@@ -81,8 +71,7 @@ struct CompletedBooksView: View {
                 .onChange(of: searchText) { _, _ in
                     filterAndSortBooks()
                 }
-                
-                // Sort selector
+
                 HStack(spacing: 8) {
                     Text("Sort:")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -111,8 +100,7 @@ struct CompletedBooksView: View {
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 16)
-            
-            // Table Content
+
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(paginatedBooks.enumerated()), id: \.element.id) { index, completed in
@@ -131,8 +119,7 @@ struct CompletedBooksView: View {
             }
             
             Divider()
-            
-            // Pagination Controls
+
             HStack(spacing: 20) {
                 Text("\(filteredBooks.count) books")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
@@ -235,8 +222,7 @@ struct CompletedBooksView: View {
     
     private func filterAndSortBooks() {
         var filtered = completedBooks
-        
-        // Apply search filter
+
         if !searchText.isEmpty {
             filtered = filtered.filter { completed in
                 guard let book = completed.book else { return false }
@@ -246,8 +232,7 @@ struct CompletedBooksView: View {
                        (book.genre?.localizedCaseInsensitiveContains(searchText) ?? false)
             }
         }
-        
-        // Apply sorting
+
         switch sortOption {
         case .author:
             filtered.sort { ($0.book?.author ?? "") < ($1.book?.author ?? "") }
@@ -263,8 +248,6 @@ struct CompletedBooksView: View {
         currentPage = 0
     }
 }
-
-// MARK: - Completed Book Row
 
 struct CompletedBookRow: View {
     let completed: CompletedBook
@@ -285,7 +268,6 @@ struct CompletedBookRow: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Cover
             Group {
                 if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
                     AsyncImage(url: url) { image in
@@ -304,8 +286,7 @@ struct CompletedBookRow: View {
             .frame(width: 45, height: 68)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
-            
-            // Title (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.bookDetail(bookId: book.id))
             }) {
@@ -316,8 +297,7 @@ struct CompletedBookRow: View {
                     .lineLimit(2)
             }
             .buttonStyle(.plain)
-            
-            // Series (clickable)
+
             if let series = book.series {
                 Button(action: {
                     navigationPath.append(NavigationDestination.series(name: series))
@@ -335,8 +315,7 @@ struct CompletedBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 130, alignment: .leading)
             }
-            
-            // Author (clickable)
+
             Button(action: {
                 navigationPath.append(NavigationDestination.author(name: book.author))
             }) {
@@ -347,8 +326,7 @@ struct CompletedBookRow: View {
                     .lineLimit(1)
             }
             .buttonStyle(.plain)
-            
-            // Genre (clickable)
+
             if let genre = book.genre {
                 Button(action: {
                     navigationPath.append(NavigationDestination.genre(name: genre))
@@ -366,14 +344,12 @@ struct CompletedBookRow: View {
                     .foregroundColor(.secondary.opacity(0.5))
                     .frame(width: 100, alignment: .leading)
             }
-            
-            // Page Count
+
             Text("\(book.pageCount)")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 60, alignment: .leading)
-            
-            // Rating
+
             HStack(spacing: 3) {
                 if let rating = completed.rating {
                     ForEach(1...5, id: \.self) { star in
@@ -388,16 +364,14 @@ struct CompletedBookRow: View {
                 }
             }
             .frame(width: 80, alignment: .leading)
-            
-            // Completion Date
+
             Text(dateFormatter.string(from: completed.completionDate))
                 .font(.system(size: 13, design: .rounded))
                 .foregroundColor(.secondary)
                 .frame(width: 100, alignment: .leading)
             
             Spacer()
-            
-            // Action Buttons
+
             HStack(spacing: 8) {
                 ActionButton(
                     icon: "arrow.up.right.circle.fill",
@@ -449,8 +423,6 @@ struct CompletedBookRow: View {
     }
 }
 
-// MARK: - Edit Completed Book Modal
-
 struct EditCompletedBookModal: View {
     let completed: CompletedBook
     let onSave: () -> Void
@@ -474,7 +446,6 @@ struct EditCompletedBookModal: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Edit Completed Book")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
@@ -509,8 +480,7 @@ struct EditCompletedBookModal: View {
                 }
                 
                 Divider()
-                
-                // Rating
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Rating", systemImage: "star.fill")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -527,8 +497,7 @@ struct EditCompletedBookModal: View {
                         }
                     }
                 }
-                
-                // Review
+
                 VStack(alignment: .leading, spacing: 12) {
                     Label("Review", systemImage: "text.alignleft")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
@@ -545,8 +514,7 @@ struct EditCompletedBookModal: View {
                                 .stroke(Color.secondary.opacity(0.2), lineWidth: 1)
                         )
                 }
-                
-                // Dates
+
                 VStack(alignment: .leading, spacing: 16) {
                     DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
                         .font(.system(size: 14, design: .rounded))
@@ -559,8 +527,7 @@ struct EditCompletedBookModal: View {
             .padding(.vertical, 24)
             
             Divider()
-            
-            // Action Buttons
+
             HStack(spacing: 12) {
                 Button(action: onCancel) {
                     Text("Cancel")
@@ -611,9 +578,4 @@ struct EditCompletedBookModal: View {
         )
         onSave()
     }
-}
-
-#Preview {
-    CompletedBooksView(navigationPath: .constant(NavigationPath()))
-        .environmentObject(DatabaseManager.shared)
 }

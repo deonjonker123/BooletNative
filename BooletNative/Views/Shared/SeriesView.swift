@@ -14,6 +14,7 @@ struct SeriesView: View {
     @State private var bookToEdit: Book?
     @State private var bookToDelete: Book?
     @State private var bookToRead: Book?
+    @State private var sortAscending: Bool = true
     
     @Environment(\.dismiss) var dismiss
     
@@ -112,6 +113,20 @@ struct SeriesView: View {
                     .pickerStyle(.menu)
                     .font(.system(size: 13, design: .rounded))
                     .frame(width: 150)
+                    
+                    Button(action: {
+                        sortAscending.toggle()
+                        filterAndSortBooks()
+                    }) {
+                        Image(systemName: sortAscending ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .frame(width: 24, height: 24)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .help(sortAscending ? "Ascending" : "Descending")
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
@@ -291,13 +306,13 @@ struct SeriesView: View {
 
         switch sortOption {
         case .seriesNumber:
-            filtered.sort { ($0.book.seriesNumber ?? 0) < ($1.book.seriesNumber ?? 0) }
+            filtered.sort { sortAscending ? ($0.book.seriesNumber ?? 0) < ($1.book.seriesNumber ?? 0) : ($0.book.seriesNumber ?? 0) > ($1.book.seriesNumber ?? 0) }
         case .title:
-            filtered.sort { $0.book.title < $1.book.title }
+            filtered.sort { sortAscending ? $0.book.title < $1.book.title : $0.book.title > $1.book.title }
         case .pageCount:
-            filtered.sort { $0.book.pageCount < $1.book.pageCount }
+            filtered.sort { sortAscending ? $0.book.pageCount < $1.book.pageCount : $0.book.pageCount > $1.book.pageCount }
         case .dateAdded:
-            filtered.sort { $0.book.dateAdded > $1.book.dateAdded }
+            filtered.sort { sortAscending ? $0.book.dateAdded < $1.book.dateAdded : $0.book.dateAdded > $1.book.dateAdded }
         }
         
         filteredBooks = filtered

@@ -11,6 +11,7 @@ struct AbandonedBooksView: View {
     @State private var currentPage: Int = 0
     @State private var bookToEdit: AbandonedBook?
     @State private var bookToRemove: AbandonedBook?
+    @State private var sortAscending: Bool = false
     
     enum SortOption: String, CaseIterable {
         case author = "Author"
@@ -85,6 +86,20 @@ struct AbandonedBooksView: View {
                     .pickerStyle(.menu)
                     .font(.system(size: 13, design: .rounded))
                     .frame(width: 150)
+                    
+                    Button(action: {
+                        sortAscending.toggle()
+                        filterAndSortBooks()
+                    }) {
+                        Image(systemName: sortAscending ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .frame(width: 24, height: 24)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .help(sortAscending ? "Ascending" : "Descending")
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
@@ -235,13 +250,13 @@ struct AbandonedBooksView: View {
 
         switch sortOption {
         case .author:
-            filtered.sort { ($0.book?.author ?? "") < ($1.book?.author ?? "") }
+            filtered.sort { sortAscending ? ($0.book?.author ?? "") < ($1.book?.author ?? "") : ($0.book?.author ?? "") > ($1.book?.author ?? "") }
         case .title:
-            filtered.sort { ($0.book?.title ?? "") < ($1.book?.title ?? "") }
+            filtered.sort { sortAscending ? ($0.book?.title ?? "") < ($1.book?.title ?? "") : ($0.book?.title ?? "") > ($1.book?.title ?? "") }
         case .pageCount:
-            filtered.sort { ($0.book?.pageCount ?? 0) < ($1.book?.pageCount ?? 0) }
+            filtered.sort { sortAscending ? ($0.book?.pageCount ?? 0) < ($1.book?.pageCount ?? 0) : ($0.book?.pageCount ?? 0) > ($1.book?.pageCount ?? 0) }
         case .abandonmentDate:
-            filtered.sort { $0.abandonmentDate > $1.abandonmentDate }
+            filtered.sort { sortAscending ? $0.abandonmentDate < $1.abandonmentDate : $0.abandonmentDate > $1.abandonmentDate }
         }
         
         filteredBooks = filtered

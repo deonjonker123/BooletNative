@@ -13,6 +13,7 @@ struct LibraryView: View {
     @State private var bookToEdit: Book?
     @State private var bookToDelete: Book?
     @State private var bookToRead: Book?
+    @State private var sortAscending: Bool = false
     
     enum SortOption: String, CaseIterable {
         case author = "Author"
@@ -109,6 +110,20 @@ struct LibraryView: View {
                     .pickerStyle(.menu)
                     .font(.system(size: 13, design: .rounded))
                     .frame(width: 150)
+                    
+                    Button(action: {
+                        sortAscending.toggle()
+                        filterAndSortBooks()
+                    }) {
+                        Image(systemName: sortAscending ? "arrow.up" : "arrow.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(.primary)
+                            .frame(width: 24, height: 24)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .help(sortAscending ? "Ascending" : "Descending")
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
@@ -287,13 +302,13 @@ struct LibraryView: View {
 
         switch sortOption {
         case .author:
-            filtered.sort { $0.author < $1.author }
+            filtered.sort { sortAscending ? $0.author < $1.author : $0.author > $1.author }
         case .title:
-            filtered.sort { $0.title < $1.title }
+            filtered.sort { sortAscending ? $0.title < $1.title : $0.title > $1.title }
         case .pageCount:
-            filtered.sort { $0.pageCount < $1.pageCount }
+            filtered.sort { sortAscending ? $0.pageCount < $1.pageCount : $0.pageCount > $1.pageCount }
         case .dateAdded:
-            filtered.sort { $0.dateAdded > $1.dateAdded }
+            filtered.sort { sortAscending ? $0.dateAdded < $1.dateAdded : $0.dateAdded > $1.dateAdded }
         }
         
         filteredBooks = filtered

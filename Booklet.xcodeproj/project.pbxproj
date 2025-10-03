@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		842908922E8EB485005DFD9D /* BooletNative.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BooletNative.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		842908922E8EB485005DFD9D /* Booklet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Booklet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		842908A32E8EB527005DFD9D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		842908A52E8EB5B2005DFD9D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		842908942E8EB485005DFD9D /* BooletNative */ = {
+		842908942E8EB485005DFD9D /* Booklet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BooletNative;
+			path = Booklet;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -34,7 +34,7 @@
 		842908892E8EB485005DFD9D = {
 			isa = PBXGroup;
 			children = (
-				842908942E8EB485005DFD9D /* BooletNative */,
+				842908942E8EB485005DFD9D /* Booklet */,
 				842908A22E8EB527005DFD9D /* Frameworks */,
 				842908932E8EB485005DFD9D /* Products */,
 				842908A52E8EB5B2005DFD9D /* .gitignore */,
@@ -44,7 +44,7 @@
 		842908932E8EB485005DFD9D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				842908922E8EB485005DFD9D /* BooletNative.app */,
+				842908922E8EB485005DFD9D /* Booklet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,9 +60,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		842908912E8EB485005DFD9D /* BooletNative */ = {
+		842908912E8EB485005DFD9D /* Booklet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8429089D2E8EB485005DFD9D /* Build configuration list for PBXNativeTarget "BooletNative" */;
+			buildConfigurationList = 8429089D2E8EB485005DFD9D /* Build configuration list for PBXNativeTarget "Booklet" */;
 			buildPhases = (
 				8429088E2E8EB485005DFD9D /* Sources */,
 				8429088F2E8EB485005DFD9D /* Frameworks */,
@@ -73,13 +73,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				842908942E8EB485005DFD9D /* BooletNative */,
+				842908942E8EB485005DFD9D /* Booklet */,
 			);
-			name = BooletNative;
+			name = Booklet;
 			packageProductDependencies = (
 			);
 			productName = BooletNative;
-			productReference = 842908922E8EB485005DFD9D /* BooletNative.app */;
+			productReference = 842908922E8EB485005DFD9D /* Booklet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -97,7 +97,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8429088D2E8EB485005DFD9D /* Build configuration list for PBXProject "BooletNative" */;
+			buildConfigurationList = 8429088D2E8EB485005DFD9D /* Build configuration list for PBXProject "Booklet" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -111,7 +111,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				842908912E8EB485005DFD9D /* BooletNative */,
+				842908912E8EB485005DFD9D /* Booklet */,
 			);
 		};
 /* End PBXProject section */
@@ -346,7 +346,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8429088D2E8EB485005DFD9D /* Build configuration list for PBXProject "BooletNative" */ = {
+		8429088D2E8EB485005DFD9D /* Build configuration list for PBXProject "Booklet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8429089B2E8EB485005DFD9D /* Debug */,
@@ -355,7 +355,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8429089D2E8EB485005DFD9D /* Build configuration list for PBXNativeTarget "BooletNative" */ = {
+		8429089D2E8EB485005DFD9D /* Build configuration list for PBXNativeTarget "Booklet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8429089E2E8EB485005DFD9D /* Debug */,

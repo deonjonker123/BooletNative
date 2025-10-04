@@ -87,51 +87,6 @@ struct StatisticsView: View {
                 Divider()
                     .padding(.horizontal, 32)
 
-                HStack {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "flame.fill")
-                                .font(.system(size: 24))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.orange, .red],
-                                        startPoint: .top,
-                                        endPoint: .bottom
-                                    )
-                                )
-                            
-                            Text("Reading Streak")
-                                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                                .foregroundColor(.primary)
-                        }
-                        
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text("\(readingStreak)")
-                                .font(.system(size: 56, weight: .bold, design: .rounded))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [.orange, .red],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    )
-                                )
-                            
-                            Text("consecutive days")
-                                .font(.system(size: 16, weight: .medium, design: .rounded))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    Spacer()
-                }
-                .padding(28)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(nsColor: .controlBackgroundColor))
-                        .shadow(color: Color.black.opacity(0.06), radius: 10, x: 0, y: 4)
-                )
-                .padding(.horizontal, 32)
-
                 LazyVGrid(columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),

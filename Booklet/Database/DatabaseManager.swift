@@ -218,11 +218,12 @@ class DatabaseManager: ObservableObject {
     }
     
     func addToReadingTracker(bookId: Int) -> Bool {
-        let query = "INSERT INTO reading_tracker (book_id, current_page) VALUES (?, 0)"
+        let query = "INSERT INTO reading_tracker (book_id, current_page, start_date) VALUES (?, 0, ?)"
         var statement: OpaquePointer?
         
         if sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_int(statement, 1, Int32(bookId))
+            bindDate(statement: statement, index: 2, date: Date())  // Explicitly set start_date to NOW
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 sqlite3_finalize(statement)

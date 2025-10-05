@@ -13,7 +13,7 @@ struct LibraryView: View {
     @State private var bookToEdit: Book?
     @State private var bookToDelete: Book?
     @State private var bookToRead: Book?
-    @State private var sortAscending: Bool = false
+    @State private var sortAscending: Bool = true
     
     enum SortOption: String, CaseIterable {
         case author = "Author"
